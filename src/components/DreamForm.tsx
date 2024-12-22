@@ -3,31 +3,21 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import NoNamePrompt from "./dream/NoNamePrompt";
+import EmotionSelector from "./dream/EmotionSelector";
 
 interface DreamFormProps {
   onSubmit: (dream: string, emotionBefore: string) => void;
   isLoading: boolean;
 }
 
-const EMOTIONS = [
-  { value: "😊", label: "Happy" },
-  { value: "😌", label: "Calm" },
-  { value: "😕", label: "Confused" },
-  { value: "😨", label: "Anxious" },
-  { value: "😢", label: "Sad" },
-];
-
 const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
   const [dream, setDream] = useState("");
   const [emotionBefore, setEmotionBefore] = useState("");
   const [userName, setUserName] = useState<string>("");
   const { user } = useAuth();
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -54,18 +44,6 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
     }
   };
 
-  const NoNamePrompt = () => (
-    <div className="text-center mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-      <p className="text-sm text-yellow-800 dark:text-yellow-200">
-        To make your dream interpretation more personal, please{" "}
-        <Link to="/profile" className="text-blue-600 dark:text-blue-400 hover:underline">
-          add your name to your profile
-        </Link>
-        .
-      </p>
-    </div>
-  );
-
   return (
     <motion.form
       onSubmit={handleSubmit}
@@ -78,7 +56,7 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
       
       <div className="space-y-4">
         <Label htmlFor="dream" className="text-lg">
-          {userName ? "Tell me about your dream" : "Describe your dream"}
+          Tell me about your dream
         </Label>
         <Textarea
           id="dream"
@@ -90,26 +68,10 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
         />
       </div>
 
-      <div className="space-y-4">
-        <Label className="text-lg">
-          How are you feeling about this dream?
-        </Label>
-        <RadioGroup
-          value={emotionBefore}
-          onValueChange={setEmotionBefore}
-          className="flex flex-wrap gap-4"
-        >
-          {EMOTIONS.map(({ value, label }) => (
-            <div key={value} className="flex items-center space-x-2">
-              <RadioGroupItem value={value} id={`emotion-${value}`} />
-              <Label htmlFor={`emotion-${value}`} className="flex items-center space-x-2">
-                <span className="text-2xl">{value}</span>
-                <span>{label}</span>
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      </div>
+      <EmotionSelector 
+        value={emotionBefore}
+        onChange={setEmotionBefore}
+      />
 
       <Button
         type="submit"
