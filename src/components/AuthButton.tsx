@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
-import { LogIn, LogOut, User, CalendarDays, Menu } from 'lucide-react';
+import { LogIn, LogOut, User, CalendarDays, Menu, Settings } from 'lucide-react';
 import SignUpWall from './SignUpWall';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -32,33 +32,49 @@ const AuthButton = () => {
     navigate('/journal');
   };
 
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
+
   // Desktop version (md and up)
   const DesktopButtons = () => (
     <div className="hidden md:flex items-center gap-4">
       {user && (
+        <>
+          <Button
+            onClick={handleJournalClick}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <CalendarDays className="h-4 w-4" />
+            Dream Journal
+          </Button>
+          <Button
+            onClick={handleProfileClick}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Profile
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleAuthClick}
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </>
+      )}
+      {!user && (
         <Button
-          onClick={handleJournalClick}
-          variant="outline"
-          className="flex items-center gap-2"
+          variant="ghost"
+          size="icon"
+          onClick={handleAuthClick}
         >
-          <CalendarDays className="h-4 w-4" />
-          Dream Journal
+          <LogIn className="h-5 w-5" />
         </Button>
       )}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleAuthClick}
-      >
-        {user ? (
-          <div className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            <LogOut className="h-5 w-5" />
-          </div>
-        ) : (
-          <LogIn className="h-5 w-5" />
-        )}
-      </Button>
     </div>
   );
 
@@ -76,6 +92,10 @@ const AuthButton = () => {
             <DropdownMenuItem onClick={handleJournalClick}>
               <CalendarDays className="h-4 w-4 mr-2" />
               Dream Journal
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleProfileClick}>
+              <Settings className="h-4 w-4 mr-2" />
+              Profile
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleAuthClick}>
               <LogOut className="h-4 w-4 mr-2" />
