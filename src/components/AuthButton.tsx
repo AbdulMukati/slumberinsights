@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
-import { LogIn, LogOut, CalendarDays, Menu, Settings, Shield } from 'lucide-react';
+import { LogIn, LogOut, CalendarDays, Menu, Settings, Shield, LineChart } from 'lucide-react';
 import SignUpWall from './SignUpWall';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,6 +64,12 @@ const AuthButton = () => {
     navigate('/admin');
   };
 
+  const handleReportsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate('/reports');
+  };
+
   // Desktop version (md and up)
   const DesktopButtons = () => (
     <div className="hidden md:flex items-center gap-4">
@@ -76,6 +82,14 @@ const AuthButton = () => {
           >
             <CalendarDays className="h-4 w-4" />
             Dream Journal
+          </Button>
+          <Button
+            onClick={handleReportsClick}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <LineChart className="h-4 w-4" />
+            Reports
           </Button>
           <Button
             onClick={handleProfileClick}
@@ -130,6 +144,10 @@ const AuthButton = () => {
             <DropdownMenuItem onClick={handleJournalClick}>
               <CalendarDays className="h-4 w-4 mr-2" />
               Dream Journal
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleReportsClick}>
+              <LineChart className="h-4 w-4 mr-2" />
+              Reports
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleProfileClick}>
               <Settings className="h-4 w-4 mr-2" />
