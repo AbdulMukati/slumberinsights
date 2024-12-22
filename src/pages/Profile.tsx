@@ -22,33 +22,23 @@ const Profile = () => {
     }
 
     const fetchProfile = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", user.id)
-          .maybeSingle();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle();
 
-        if (error) {
-          console.error("Error fetching profile:", error);
-          toast({
-            title: "Error",
-            description: "Failed to fetch profile",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        if (data) {
-          setFullName(data.full_name || "");
-        }
-      } catch (error) {
-        console.error("Error in fetchProfile:", error);
+      if (error) {
         toast({
           title: "Error",
-          description: "An unexpected error occurred",
+          description: "Failed to fetch profile",
           variant: "destructive",
         });
+        return;
+      }
+
+      if (data) {
+        setFullName(data.full_name);
       }
     };
 
@@ -60,58 +50,48 @@ const Profile = () => {
     if (!user) return;
 
     setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({ 
-          id: user.id, 
-          full_name: fullName,
-          updated_at: new Date().toISOString()
-        });
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, full_name: fullName });
 
-      if (error) throw error;
+    setIsLoading(false);
 
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating profile:", error);
+    if (error) {
       toast({
         title: "Error",
         description: "Failed to update profile",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
+
+    toast({
+      title: "Success",
+      description: "Profile updated successfully",
+    });
   };
 
   const handleResetPassword = async () => {
     if (!user?.email) return;
 
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
 
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Password reset email sent",
-      });
-    } catch (error) {
-      console.error("Error sending reset password email:", error);
+    if (error) {
       toast({
         title: "Error",
         description: "Failed to send reset password email",
         variant: "destructive",
       });
+      return;
     }
-  };
 
-  if (!user) return null;
+    toast({
+      title: "Success",
+      description: "Password reset email sent",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900 p-4">

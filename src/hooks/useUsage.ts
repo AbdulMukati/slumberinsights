@@ -9,9 +9,9 @@ export function useUsage() {
         .from('user_usage')
         .select('*')
         .eq('date', new Date().toISOString().split('T')[0])
-        .maybeSingle();
+        .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') throw error;
       return data || { dream_interpretations_count: 0, image_generations_count: 0 };
     },
   });

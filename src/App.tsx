@@ -40,26 +40,14 @@ const Navigation = () => {
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
+      if (user) {
+        const { data: profile } = await supabase
           .from("profiles")
           .select("is_admin")
           .eq("id", user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Error fetching admin status:", error);
-          return;
-        }
-
-        setIsAdmin(data?.is_admin || false);
-      } catch (error) {
-        console.error("Error in checkAdminStatus:", error);
+          .single();
+        
+        setIsAdmin(profile?.is_admin || false);
       }
     };
 
