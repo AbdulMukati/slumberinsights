@@ -18,7 +18,7 @@ const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleDreamSubmit = async (dream: string, emotionBefore: string) => {
+  const handleDreamSubmit = async (dream: string, emotionBefore: string, useIslamicInterpretation: boolean) => {
     if (!user) {
       setShowSignUpWall(true);
       return;
@@ -29,7 +29,7 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('interpret-dream', {
-        body: { dream, emotionBefore, userId: user.id },
+        body: { dream, emotionBefore, userId: user.id, useIslamicInterpretation },
       });
 
       if (error) throw error;

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import NoNamePrompt from "./dream/NoNamePrompt";
@@ -11,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EMOTIONS } from "./dream/EmotionSelector";
 
 interface DreamFormProps {
-  onSubmit: (dream: string, emotionBefore: string) => void;
+  onSubmit: (dream: string, emotionBefore: string, useIslamicInterpretation: boolean) => void;
   isLoading: boolean;
 }
 
@@ -23,6 +24,7 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
   const [emotionBefore, setEmotionBefore] = useState("");
   const [userName, setUserName] = useState<string>("");
   const [showPrompt, setShowPrompt] = useState(false);
+  const [useIslamicInterpretation, setUseIslamicInterpretation] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -72,7 +74,7 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
 
     if (dream.trim() && emotionBefore) {
       const emotion = EMOTIONS.find(e => e.value === emotionBefore);
-      onSubmit(dream, emotionBefore);
+      onSubmit(dream, emotionBefore, useIslamicInterpretation);
       if (emotion) {
         // The emotion_before_value will be saved in the onSubmit handler
       }
@@ -118,6 +120,17 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
         value={emotionBefore}
         onChange={setEmotionBefore}
       />
+
+      <div className="flex items-center space-x-2 py-4">
+        <Switch
+          id="islamic-interpretation"
+          checked={useIslamicInterpretation}
+          onCheckedChange={setUseIslamicInterpretation}
+        />
+        <Label htmlFor="islamic-interpretation">
+          Include Islamic interpretation (based on Quran and Hadith)
+        </Label>
+      </div>
 
       <Button
         type="submit"

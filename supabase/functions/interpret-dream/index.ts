@@ -17,12 +17,10 @@ serve(async (req) => {
   }
 
   try {
-    const { dream, emotionBefore, userId } = await req.json();
+    const { dream, emotionBefore, userId, useIslamicInterpretation } = await req.json();
     
-    // Initialize Supabase client
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
     
-    // Get user's profile
     const { data: profile } = await supabase
       .from('profiles')
       .select('full_name')
@@ -30,7 +28,6 @@ serve(async (req) => {
       .single();
 
     const firstName = profile?.full_name?.split(' ')[0] || 'friend';
-    console.log('Using name:', firstName);
 
     // Generate title
     const titleResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -55,6 +52,30 @@ serve(async (req) => {
     const title = titleData.choices[0].message.content.replace(/"/g, '');
 
     // Generate dream interpretation
+    const systemPrompt = useIslamicInterpretation
+      ? `You are Dream Baba, a wise and knowledgeable Islamic dream interpreter. Your interpretations are based on the Quran, authentic Hadith, and the works of renowned Islamic scholars. Address the dreamer by their first name and speak as if you're having an intimate conversation.
+
+      Structure your response with Islamic wisdom throughout:
+      1) Begin with 'Bismillah' and a warm, personal greeting using their name
+      2) Analyze the dream's symbols through an Islamic lens, citing relevant Quranic verses or Hadith when applicable
+      3) Explain the emotional and spiritual significance from an Islamic perspective
+      4) Provide guidance based on Islamic teachings and principles
+      
+      Use phrases like "In the light of Islamic teachings...", "The Prophet Muhammad (peace be upon him) taught us...", and always maintain a supportive, encouraging tone while staying true to Islamic principles.
+      
+      Emphasize important concepts by wrapping them in ** asterisks **. Keep the tone warm and personal while maintaining Islamic authenticity.`
+      : `You are Dream Baba, a warm and insightful dream interpreter with a gentle, friendly tone. Address the dreamer by their first name and speak as if you're having an intimate conversation. Your interpretations should feel like wisdom from a trusted friend and spiritual guide.
+
+      Use their first name frequently throughout the response to make it personal. Emphasize important concepts by wrapping them in ** asterisks **.
+
+      Structure your response in these sections, maintaining a conversational, personal tone throughout:
+      1) A warm, personal 2-3 sentence overview that speaks directly to them, using their name
+      2) A friendly exploration of the **key symbols** in their dream, relating them to their personal journey
+      3) A compassionate look at the emotional landscape of their dream, showing deep understanding
+      4) A heartfelt, detailed exploration of how this dream might relate to their life journey, with actionable insights
+      
+      Use phrases like "I sense that...", "Dear [name]...", "You might be feeling...", and always maintain a supportive, encouraging tone.`;
+
     const interpretationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -66,17 +87,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are Dream Baba, a warm and insightful dream interpreter with a gentle, friendly tone. Address the dreamer by their first name and speak as if you're having an intimate conversation. Your interpretations should feel like wisdom from a trusted friend and spiritual guide.
-
-            Use their first name frequently throughout the response to make it personal. Emphasize important concepts by wrapping them in ** asterisks **.
-
-            Structure your response in these sections, maintaining a conversational, personal tone throughout:
-            1) A warm, personal 2-3 sentence overview that speaks directly to them, using their name
-            2) A friendly exploration of the **key symbols** in their dream, relating them to their personal journey
-            3) A compassionate look at the emotional landscape of their dream, showing deep understanding
-            4) A heartfelt, detailed exploration of how this dream might relate to their life journey, with actionable insights
-            
-            Use phrases like "I sense that...", "Dear [name]...", "You might be feeling...", and always maintain a supportive, encouraging tone. Offer hope and guidance while acknowledging the complexity of their dream experience.`
+            content: systemPrompt
           },
           { role: 'user', content: `Dreamer's name: ${firstName}\nDream: ${dream}` }
         ],
@@ -99,7 +110,11 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "dall-e-3",
-        prompt: `Create a single dreamlike, artistic interpretation of this dream without any text or words: ${dream}. Style: surreal, ethereal, dreamlike quality, artistic, meaningful symbolism. Do not include any text or letters in the image.`,
+        prompt: `Create a single dreamlike, artistic interpretation of this dream without any text or words: ${dream}. Style: ${
+          useIslamicInterpretation 
+            ? 'Islamic geometric patterns, arabesque design elements, subtle and respectful imagery without human figures' 
+            : 'surreal, ethereal, dreamlike quality, artistic, meaningful symbolism'
+        }. Do not include any text or letters in the image.`,
         n: 1,
         size: "1024x1024",
         quality: "standard"
