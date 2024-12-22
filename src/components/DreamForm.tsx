@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface DreamFormProps {
   onSubmit: (dream: string, emotionBefore: string) => void;
@@ -21,6 +25,27 @@ const EMOTIONS = [
 const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
   const [dream, setDream] = useState("");
   const [emotionBefore, setEmotionBefore] = useState("");
+  const [userName, setUserName] = useState<string>("");
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (data && !error) {
+          setUserName(data.full_name);
+        }
+      }
+    };
+
+    fetchUserName();
+  }, [user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +53,18 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
       onSubmit(dream, emotionBefore);
     }
   };
+
+  const NoNamePrompt = () => (
+    <div className="text-center mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+      <p className="text-sm text-yellow-800 dark:text-yellow-200">
+        To make your dream interpretation more personal, please{" "}
+        <Link to="/profile" className="text-blue-600 dark:text-blue-400 hover:underline">
+          add your name to your profile
+        </Link>
+        .
+      </p>
+    </div>
+  );
 
   return (
     <motion.form
@@ -37,20 +74,26 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
       animate={{ opacity: 1 }}
       transition={{ delay: 0.2 }}
     >
+      {user && !userName && <NoNamePrompt />}
+      
       <div className="space-y-4">
-        <Label htmlFor="dream">Describe your dream</Label>
+        <Label htmlFor="dream" className="text-lg">
+          {userName ? `${userName}, describe your dream` : "Describe your dream"}
+        </Label>
         <Textarea
           id="dream"
           value={dream}
           onChange={(e) => setDream(e.target.value)}
-          placeholder="Describe your dream in detail..."
+          placeholder={userName ? `${userName}, share the details of your dream...` : "Share the details of your dream..."}
           className="min-h-[200px] mb-4 p-4 text-lg"
           disabled={isLoading}
         />
       </div>
 
       <div className="space-y-4">
-        <Label>How do you feel about this dream?</Label>
+        <Label className="text-lg">
+          {userName ? `${userName}, how do you feel about this dream?` : "How do you feel about this dream?"}
+        </Label>
         <RadioGroup
           value={emotionBefore}
           onValueChange={setEmotionBefore}
@@ -73,7 +116,12 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
         disabled={isLoading || !dream.trim() || !emotionBefore}
         className="w-full bg-purple-600 hover:bg-purple-700 text-white"
       >
-        {isLoading ? "Interpreting..." : "Interpret Dream"}
+        {isLoading ? 
+          "Interpreting..." : 
+          userName ? 
+            `Interpret ${userName}'s Dream` : 
+            "Interpret Dream"
+        }
       </Button>
     </motion.form>
   );
