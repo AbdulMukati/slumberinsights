@@ -1,12 +1,12 @@
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-const EMOTIONS = [
-  { value: "😊", label: "Happy" },
-  { value: "😌", label: "Calm" },
-  { value: "😕", label: "Confused" },
-  { value: "😨", label: "Anxious" },
-  { value: "😢", label: "Sad" },
+export const EMOTIONS = [
+  { value: "😊", label: "Happy", score: 5 },
+  { value: "😌", label: "Calm", score: 4 },
+  { value: "😕", label: "Confused", score: 3 },
+  { value: "😨", label: "Anxious", score: 2 },
+  { value: "😢", label: "Sad", score: 1 },
 ];
 
 interface EmotionSelectorProps {

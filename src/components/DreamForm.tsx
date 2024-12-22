@@ -7,16 +7,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import NoNamePrompt from "./dream/NoNamePrompt";
 import EmotionSelector from "./dream/EmotionSelector";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EMOTIONS } from "./dream/EmotionSelector";
 
 interface DreamFormProps {
   onSubmit: (dream: string, emotionBefore: string) => void;
   isLoading: boolean;
 }
 
+const MIN_DREAM_LENGTH = 50;
+const GIBBERISH_PATTERN = /^[a-z]+$/i;
+
 const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
   const [dream, setDream] = useState("");
   const [emotionBefore, setEmotionBefore] = useState("");
   const [userName, setUserName] = useState<string>("");
+  const [showPrompt, setShowPrompt] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -37,10 +43,39 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
     fetchUserName();
   }, [user]);
 
+  const validateDream = (text: string) => {
+    if (text.length < MIN_DREAM_LENGTH) {
+      return {
+        isValid: false,
+        message: "Could you tell me more about your dream? What details do you remember? How did it make you feel?"
+      };
+    }
+
+    if (GIBBERISH_PATTERN.test(text.replace(/\s/g, ''))) {
+      return {
+        isValid: false,
+        message: "I see you're testing the system! Have you considered a career in QA? If not, why not share a real dream instead? 😊"
+      };
+    }
+
+    return { isValid: true };
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const validation = validateDream(dream);
+    
+    if (!validation.isValid) {
+      setShowPrompt(true);
+      return;
+    }
+
     if (dream.trim() && emotionBefore) {
+      const emotion = EMOTIONS.find(e => e.value === emotionBefore);
       onSubmit(dream, emotionBefore);
+      if (emotion) {
+        // The emotion_before_value will be saved in the onSubmit handler
+      }
     }
   };
 
@@ -61,11 +96,22 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
         <Textarea
           id="dream"
           value={dream}
-          onChange={(e) => setDream(e.target.value)}
+          onChange={(e) => {
+            setDream(e.target.value);
+            setShowPrompt(false);
+          }}
           placeholder="Share the details of your dream..."
           className="min-h-[200px] mb-4 p-4 text-lg"
           disabled={isLoading}
         />
+        
+        {showPrompt && (
+          <Alert>
+            <AlertDescription>
+              {validateDream(dream).message}
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
 
       <EmotionSelector 

@@ -15,7 +15,9 @@ export type Database = {
           detailed_interpretation: string | null
           dream: string
           emotion_after: string | null
+          emotion_after_value: number | null
           emotion_before: string | null
+          emotion_before_value: number | null
           emotional_analysis: string | null
           id: string
           image_url: string | null
@@ -30,7 +32,9 @@ export type Database = {
           detailed_interpretation?: string | null
           dream: string
           emotion_after?: string | null
+          emotion_after_value?: number | null
           emotion_before?: string | null
+          emotion_before_value?: number | null
           emotional_analysis?: string | null
           id?: string
           image_url?: string | null
@@ -45,7 +49,9 @@ export type Database = {
           detailed_interpretation?: string | null
           dream?: string
           emotion_after?: string | null
+          emotion_after_value?: number | null
           emotion_before?: string | null
+          emotion_before_value?: number | null
           emotional_analysis?: string | null
           id?: string
           image_url?: string | null
