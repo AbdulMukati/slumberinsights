@@ -1,7 +1,25 @@
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 const LoadingDream = () => {
-  const text = "Let me ponder your dream for a moment";
+  const loadingMessages = [
+    "Let me ponder your dream for a moment",
+    "Hmm... flying elephants? How intriguing!",
+    "Analyzing the deeper meaning",
+    "Connecting the dream dots",
+    "Diving into your subconscious",
+    "Decoding the dream symbols"
+  ];
+  
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
   
   return (
     <motion.div
@@ -23,7 +41,7 @@ const LoadingDream = () => {
             animate={{ filter: ["blur(0px)", "blur(2px)", "blur(0px)"] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            {text.split("").map((char, index) => (
+            {loadingMessages[currentMessageIndex].split("").map((char, index) => (
               <motion.span
                 key={index}
                 initial={{ opacity: 0 }}

@@ -24,6 +24,7 @@ interface DreamEntry {
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isBackgroundSaving, setIsBackgroundSaving] = useState(false);
   const [currentDream, setCurrentDream] = useState<DreamEntry | null>(null);
   const [showSignUpWall, setShowSignUpWall] = useState(false);
   const [pendingDream, setPendingDream] = useState<{text: string, emotion: string} | null>(null);
@@ -69,29 +70,47 @@ const Index = () => {
         description: "Please complete your profile with your name first.",
         variant: "destructive"
       });
-      // Here you could navigate to a profile completion page
       return;
     }
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('interpret-dream', {
+      const { data: interpretation, error } = await supabase.functions.invoke('interpret-dream', {
         body: { dream: dreamText, userName }
       });
 
       if (error) throw error;
 
+      // Create a temporary dream entry for immediate display
+      const tempDream: DreamEntry = {
+        id: 'temp-' + Date.now(),
+        dream: dreamText,
+        interpretation: interpretation.interpretation,
+        symbolism: interpretation.symbolism,
+        emotional_analysis: interpretation.emotional_analysis,
+        detailed_interpretation: interpretation.detailed_interpretation,
+        title: interpretation.title,
+        image_url: interpretation.image_url,
+        emotion_before: emotionBefore,
+        created_at: new Date().toISOString()
+      };
+
+      setCurrentDream(tempDream);
+      setIsLoading(false);
+      setIsBackgroundSaving(true);
+
+      // Save to database in the background
       const { data: savedDream, error: saveError } = await supabase
         .from('dreams')
         .insert([{
           user_id: user.id,
           dream: dreamText,
-          interpretation: data.interpretation,
-          symbolism: data.symbolism,
-          emotional_analysis: data.emotional_analysis,
-          detailed_interpretation: data.detailed_interpretation,
-          title: data.title,
-          image_url: data.image_url,
+          interpretation: interpretation.interpretation,
+          symbolism: interpretation.symbolism,
+          emotional_analysis: interpretation.emotional_analysis,
+          detailed_interpretation: interpretation.detailed_interpretation,
+          title: interpretation.title,
+          image_url: interpretation.image_url,
           emotion_before: emotionBefore,
         }])
         .select()
@@ -99,19 +118,21 @@ const Index = () => {
 
       if (saveError) throw saveError;
       
+      // Update the current dream with the saved version (including real ID)
       setCurrentDream(savedDream as DreamEntry);
+      setIsBackgroundSaving(false);
+      
       toast({
         title: "Dream Interpreted",
         description: "Your dream has been interpreted and saved to your journal.",
       });
     } catch (error) {
+      setIsBackgroundSaving(false);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to analyze your dream. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -138,7 +159,7 @@ const Index = () => {
           Share your dream and receive a deep, meaningful interpretation
         </p>
         
-        <DreamForm onSubmit={analyzeDream} isLoading={isLoading} />
+        <DreamForm onSubmit={analyzeDream} isLoading={isLoading || isBackgroundSaving} />
         
         {isLoading && <LoadingDream />}
         
