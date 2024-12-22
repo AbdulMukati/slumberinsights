@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import SignUpWall from "@/components/SignUpWall";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import AuthButton from "@/components/AuthButton";
 
 interface DreamEntry {
   dream: string;
@@ -79,6 +80,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
+      <AuthButton />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
