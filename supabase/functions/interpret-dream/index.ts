@@ -26,7 +26,14 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a professional dream interpreter with expertise in Jungian psychology, symbolism, and emotional analysis. Analyze dreams comprehensively and provide insights in English. Structure your response in these sections: 1) Brief Interpretation 2) Symbolic Analysis 3) Emotional Analysis 4) Detailed Personal Interpretation. Keep each section concise but meaningful."
+            content: `You are a professional dream interpreter with expertise in Jungian psychology, symbolism, and emotional analysis. 
+            Analyze dreams comprehensively in English and structure your response in these exact sections:
+            1) Brief Interpretation: A concise 2-3 sentence overview of the dream's main meaning
+            2) Symbolic Analysis: Detailed analysis of key symbols and their cultural/psychological significance
+            3) Emotional Analysis: Insight into the emotional landscape of the dream and what it reveals about the dreamer's psyche
+            4) Detailed Personal Interpretation: A thorough exploration of how this dream might relate to the dreamer's life, challenges, and growth
+            
+            Keep each section focused and meaningful. Use clear language and avoid jargon unless necessary.`
           },
           {
             role: "user",
@@ -43,24 +50,6 @@ serve(async (req) => {
     // Parse the sections from the GPT response
     const sections = analysis.split(/\d\)/).filter(Boolean)
     const [interpretation, symbolism, emotional, detailed] = sections.map(s => s.trim())
-
-    // Generate dream image with DALL-E
-    const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "dall-e-3",
-        prompt: `Create a dreamy, artistic interpretation of this dream: ${dream}. Style: surreal, ethereal, dreamlike quality.`,
-        n: 1,
-        size: "1024x1024"
-      })
-    })
-
-    const imageData = await imageResponse.json()
-    const imageUrl = imageData.data[0].url
 
     // Generate a title for the dream
     const titleResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -87,6 +76,24 @@ serve(async (req) => {
 
     const titleData = await titleResponse.json()
     const title = titleData.choices[0].message.content.replace(/"/g, '')
+
+    // Generate dream image with DALL-E
+    const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt: `Create a dreamy, artistic interpretation of this dream: ${dream}. Style: surreal, ethereal, dreamlike quality.`,
+        n: 1,
+        size: "1024x1024"
+      })
+    })
+
+    const imageData = await imageResponse.json()
+    const imageUrl = imageData.data[0].url
 
     return new Response(
       JSON.stringify({

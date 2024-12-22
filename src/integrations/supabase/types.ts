@@ -16,8 +16,10 @@ export type Database = {
           dream: string
           emotional_analysis: string | null
           id: string
+          image_url: string | null
           interpretation: string
           symbolism: string | null
+          title: string | null
           user_id: string | null
         }
         Insert: {
@@ -26,8 +28,10 @@ export type Database = {
           dream: string
           emotional_analysis?: string | null
           id?: string
+          image_url?: string | null
           interpretation: string
           symbolism?: string | null
+          title?: string | null
           user_id?: string | null
         }
         Update: {
@@ -36,8 +40,10 @@ export type Database = {
           dream?: string
           emotional_analysis?: string | null
           id?: string
+          image_url?: string | null
           interpretation?: string
           symbolism?: string | null
+          title?: string | null
           user_id?: string | null
         }
         Relationships: []

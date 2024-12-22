@@ -25,7 +25,7 @@ const Journal = () => {
     try {
       const { data, error } = await supabase
         .from("dreams")
-        .select("*, id")
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -35,9 +35,9 @@ const Journal = () => {
           id: dream.id,
           dream: dream.dream,
           interpretation: dream.interpretation,
-          symbolism: dream.symbolism,
-          emotional_analysis: dream.emotional_analysis,
-          detailed_interpretation: dream.detailed_interpretation,
+          symbolism: dream.symbolism || "No symbolism analysis available",
+          emotional_analysis: dream.emotional_analysis || "No emotional analysis available",
+          detailed_interpretation: dream.detailed_interpretation || "No detailed interpretation available",
           date: new Date(dream.created_at).toISOString(),
           title: dream.title || "Untitled Dream",
           image_url: dream.image_url,
