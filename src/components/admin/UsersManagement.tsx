@@ -45,7 +45,16 @@ const UsersManagement = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+      
+      // Validate and transform the data to ensure it matches the Profile type
+      const validatedData: Profile[] = (data || []).map(user => ({
+        ...user,
+        subscription_plan: (user.subscription_plan as SubscriptionPlan) || 'free',
+        is_admin: Boolean(user.is_admin),
+        subscribed: Boolean(user.subscribed)
+      }));
+      
+      setUsers(validatedData);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast({
