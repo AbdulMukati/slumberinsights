@@ -35,32 +35,15 @@ const AuthButton = () => {
   }, [user]);
 
   const handleAuthClick = async () => {
-    if (user) {
-      try {
-        await signOut();
-      } catch (error) {
-        console.error('Error signing out:', error);
-      }
-    } else {
-      setShowSignUpWall(true);
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
 
   if (!user) {
-    return (
-      <>
-        <Button
-          variant="ghost"
-          onClick={handleAuthClick}
-          className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
-        >
-          Sign In
-        </Button>
-        {showSignUpWall && (
-          <SignUpWall onComplete={() => setShowSignUpWall(false)} />
-        )}
-      </>
-    );
+    return null;
   }
 
   return (
@@ -110,6 +93,9 @@ const AuthButton = () => {
           </Button>
         </div>
       </div>
+      {showSignUpWall && (
+        <SignUpWall onComplete={() => setShowSignUpWall(false)} />
+      )}
     </>
   );
 };

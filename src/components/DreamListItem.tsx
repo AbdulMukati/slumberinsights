@@ -32,6 +32,17 @@ interface DreamListItemProps {
 }
 
 const DreamListItem = ({ dream, isExpanded, onToggle, onDelete }: DreamListItemProps) => {
+  // Function to format text with bold sections and proper spacing
+  const formatText = (text: string) => {
+    return text.split('**').map((part, index) => {
+      return index % 2 === 0 ? (
+        <span key={index} className="whitespace-pre-wrap">{part}</span>
+      ) : (
+        <strong key={index} className="font-bold text-purple-900 dark:text-purple-300">{part}</strong>
+      );
+    });
+  };
+
   return (
     <motion.div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/30">
       <div className="flex gap-4">
@@ -99,7 +110,7 @@ const DreamListItem = ({ dream, isExpanded, onToggle, onDelete }: DreamListItemP
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="space-y-4"
+                className="space-y-6"
               >
                 {dream.image_url && (
                   <div className="mt-4">
@@ -110,34 +121,40 @@ const DreamListItem = ({ dream, isExpanded, onToggle, onDelete }: DreamListItemP
                     />
                   </div>
                 )}
-                <div>
-                  <h4 className="font-semibold mb-2">Dream</h4>
-                  <p className="text-gray-700 dark:text-gray-300">{dream.dream}</p>
+                <div className="bg-white dark:bg-gray-800/50 rounded-lg p-6">
+                  <h4 className="font-semibold mb-4 text-purple-900 dark:text-purple-100">Dream</h4>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {dream.dream}
+                  </p>
                 </div>
                 {(dream.emotion_before || dream.emotion_after) && (
                   <div className="flex gap-4">
                     {dream.emotion_before && (
-                      <div>
-                        <h4 className="font-semibold mb-2">Initial Feeling</h4>
+                      <div className="bg-white dark:bg-gray-800/50 rounded-lg p-6 flex-1">
+                        <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Initial Feeling</h4>
                         <p className="text-2xl">{dream.emotion_before}</p>
                       </div>
                     )}
                     {dream.emotion_after && (
-                      <div>
-                        <h4 className="font-semibold mb-2">After Interpretation</h4>
+                      <div className="bg-white dark:bg-gray-800/50 rounded-lg p-6 flex-1">
+                        <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">After Interpretation</h4>
                         <p className="text-2xl">{dream.emotion_after}</p>
                       </div>
                     )}
                   </div>
                 )}
-                <div>
-                  <h4 className="font-semibold mb-2">Interpretation</h4>
-                  <p className="text-gray-700 dark:text-gray-300">{dream.interpretation}</p>
+                <div className="bg-white dark:bg-gray-800/50 rounded-lg p-6">
+                  <h4 className="font-semibold mb-4 text-purple-900 dark:text-purple-100">Interpretation</h4>
+                  <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {formatText(dream.interpretation)}
+                  </div>
                 </div>
                 {dream.notes && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Your Notes</h4>
-                    <p className="text-gray-700 dark:text-gray-300">{dream.notes}</p>
+                  <div className="bg-white dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="font-semibold mb-4 text-purple-900 dark:text-purple-100">Your Notes</h4>
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                      {dream.notes}
+                    </p>
                   </div>
                 )}
               </motion.div>

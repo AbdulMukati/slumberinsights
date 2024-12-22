@@ -5,6 +5,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, CalendarDays, LineChart, Settings, Shield } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Index from "@/pages/Index";
 import Journal from "@/pages/Journal";
 import Profile from "@/pages/Profile";
@@ -31,6 +34,60 @@ const ThemeToggle = () => {
   );
 };
 
+const Navigation = () => {
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+        
+        setIsAdmin(profile?.is_admin || false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
+
+  if (!user) return null;
+
+  return (
+    <>
+      <Button variant="ghost" asChild className="flex items-center gap-2">
+        <Link to="/journal">
+          <CalendarDays className="h-5 w-5" />
+          <span className="hidden md:inline">Dream Journal</span>
+        </Link>
+      </Button>
+      <Button variant="ghost" asChild className="flex items-center gap-2">
+        <Link to="/reports">
+          <LineChart className="h-5 w-5" />
+          <span className="hidden md:inline">Reports</span>
+        </Link>
+      </Button>
+      <Button variant="ghost" asChild className="flex items-center gap-2">
+        <Link to="/profile">
+          <Settings className="h-5 w-5" />
+          <span className="hidden md:inline">Profile</span>
+        </Link>
+      </Button>
+      {isAdmin && (
+        <Button variant="ghost" asChild className="flex items-center gap-2">
+          <Link to="/admin">
+            <Shield className="h-5 w-5" />
+            <span className="hidden md:inline">Admin</span>
+          </Link>
+        </Button>
+      )}
+    </>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="dream-baba-theme">
@@ -51,30 +108,7 @@ function App() {
                     </h1>
                   </Link>
                   <div className="flex items-center gap-4">
-                    <Button variant="ghost" asChild className="flex items-center gap-2">
-                      <Link to="/journal">
-                        <CalendarDays className="h-5 w-5" />
-                        <span className="hidden md:inline">Dream Journal</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" asChild className="flex items-center gap-2">
-                      <Link to="/reports">
-                        <LineChart className="h-5 w-5" />
-                        <span className="hidden md:inline">Reports</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" asChild className="flex items-center gap-2">
-                      <Link to="/profile">
-                        <Settings className="h-5 w-5" />
-                        <span className="hidden md:inline">Profile</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" asChild className="flex items-center gap-2">
-                      <Link to="/admin">
-                        <Shield className="h-5 w-5" />
-                        <span className="hidden md:inline">Admin</span>
-                      </Link>
-                    </Button>
+                    <Navigation />
                     <ThemeToggle />
                     <AuthButton />
                   </div>
