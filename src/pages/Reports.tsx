@@ -98,9 +98,8 @@ const Reports = () => {
                   <YAxis
                     dataKey="emotion"
                     type="category"
-                    tickFormatter={(value) => (
-                      <text style={{ fontSize: '24px' }}>{value}</text>
-                    )}
+                    tickFormatter={(value) => value}
+                    width={50}
                   />
                   <Tooltip
                     formatter={(value: number) => [`${value}%`, "Frequency"]}
@@ -142,9 +141,8 @@ const Reports = () => {
                   <YAxis
                     dataKey="emotion"
                     type="category"
-                    tickFormatter={(value) => (
-                      <text style={{ fontSize: '24px' }}>{value}</text>
-                    )}
+                    tickFormatter={(value) => value}
+                    width={50}
                   />
                   <Tooltip
                     formatter={(value: number) => [`${value}%`, "Frequency"]}
