@@ -3,29 +3,73 @@ import DreamForm from "@/components/DreamForm";
 import DreamInterpretation from "@/components/DreamInterpretation";
 import SignUpWall from "@/components/SignUpWall";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const [interpretation, setInterpretation] = useState<string | null>(null);
+  const [dreamData, setDreamData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const handleDreamSubmit = async (dream: string, emotionBefore: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/interpret-dream", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ dream, emotionBefore }),
+      const { data, error } = await supabase.functions.invoke('interpret-dream', {
+        body: { dream, emotionBefore, userName: user?.email },
       });
-      const data = await response.json();
-      setInterpretation(data.interpretation);
+
+      if (error) throw error;
+
+      const newDream = {
+        id: crypto.randomUUID(),
+        dream,
+        interpretation: data.interpretation,
+        created_at: new Date().toISOString(),
+        title: data.title,
+        image_url: data.image_url,
+        emotion_before: emotionBefore,
+        symbolism: data.symbolism,
+        emotional_analysis: data.emotional_analysis,
+        detailed_interpretation: data.detailed_interpretation
+      };
+
+      setDreamData(newDream);
+
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('dreams')
+        .insert([{
+          ...newDream,
+          user_id: user?.id
+        }]);
+
+      if (dbError) {
+        console.error('Error saving dream:', dbError);
+        toast({
+          title: "Error",
+          description: "Failed to save your dream interpretation.",
+          variant: "destructive",
+        });
+      }
+
     } catch (error) {
       console.error("Error interpreting dream:", error);
+      toast({
+        title: "Error",
+        description: "Failed to interpret your dream. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSignUpComplete = () => {
+    toast({
+      title: "Welcome!",
+      description: "You can now start interpreting your dreams.",
+    });
   };
 
   return (
@@ -46,11 +90,11 @@ const Index = () => {
         </div>
 
         {!user ? (
-          <SignUpWall />
+          <SignUpWall onComplete={handleSignUpComplete} />
         ) : (
           <>
             <DreamForm onSubmit={handleDreamSubmit} isLoading={isLoading} />
-            {interpretation && <DreamInterpretation interpretation={interpretation} />}
+            {dreamData && <DreamInterpretation dream={dreamData} />}
           </>
         )}
       </div>
