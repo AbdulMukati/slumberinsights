@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, CalendarDays, LineChart, Settings, Shield } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import Index from "@/pages/Index";
 import Journal from "@/pages/Journal";
@@ -43,7 +43,7 @@ function App() {
                 <div className="flex items-center justify-between h-16">
                   <Link to="/" className="flex items-center gap-4">
                     <img
-                      src="/lovable-uploads/36ba7516-2b38-4daa-989c-15de8e600de8.png"
+                      src="/lovable-uploads/60deec4a-9022-4457-9604-b4348f876c2a.png"
                       alt="Dream Baba"
                       className="w-12 h-12"
                     />
@@ -51,18 +51,30 @@ function App() {
                       Dream Baba
                     </h1>
                   </Link>
-                  <div className="hidden md:flex items-center gap-2">
-                    <Button variant="ghost" asChild>
-                      <Link to="/journal">Dream Journal</Link>
+                  <div className="hidden md:flex items-center gap-4">
+                    <Button variant="ghost" asChild className="flex items-center gap-2">
+                      <Link to="/journal">
+                        <CalendarDays className="h-5 w-5" />
+                        Dream Journal
+                      </Link>
                     </Button>
-                    <Button variant="ghost" asChild>
-                      <Link to="/reports">Reports</Link>
+                    <Button variant="ghost" asChild className="flex items-center gap-2">
+                      <Link to="/reports">
+                        <LineChart className="h-5 w-5" />
+                        Reports
+                      </Link>
                     </Button>
-                    <Button variant="ghost" asChild>
-                      <Link to="/profile">Profile</Link>
+                    <Button variant="ghost" asChild className="flex items-center gap-2">
+                      <Link to="/profile">
+                        <Settings className="h-5 w-5" />
+                        Profile
+                      </Link>
                     </Button>
-                    <Button variant="ghost" asChild>
-                      <Link to="/admin">Admin</Link>
+                    <Button variant="ghost" asChild className="flex items-center gap-2">
+                      <Link to="/admin">
+                        <Shield className="h-5 w-5" />
+                        Admin
+                      </Link>
                     </Button>
                     <ThemeToggle />
                     <AuthButton />
