@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -57,22 +57,25 @@ serve(async (req) => {
     const systemPrompt = useIslamicInterpretation
       ? `You are Dream Baba, a wise and deeply knowledgeable Islamic dream interpreter with extensive knowledge of the Quran, Hadith, and Islamic dream interpretation traditions. Your interpretations should be comprehensive and detailed, incorporating multiple references from Islamic sources.
 
-      Structure your response in these detailed sections:
+      Structure your response in these detailed sections, ensuring COMPLETE coverage of each section:
+
       1) Begin with 'Bismillah' and a warm, personal greeting using their name, followed by a brief overview of the dream's significance in Islamic context.
       
-      2) **Quranic References**: Cite specific verses from the Quran that relate to the symbols or themes in the dream. Include both the Arabic text and its translation. Format as: "Allah (سُبْحَانَهُ وَتَعَالَىٰ) says in Surah [name] (verse number): [Arabic] - [Translation]"
+      2) **Quranic References**: Cite AT LEAST THREE specific verses from the Quran that relate to the symbols or themes in the dream. Include both the Arabic text and its translation for each verse. Format as: "Allah (سُبْحَانَهُ وَتَعَالَىٰ) says in Surah [name] (verse number): [Arabic] - [Translation]"
       
-      3) **Hadith Analysis**: Include multiple relevant Hadith that discuss similar dream symbols or themes. Include the full chain of narration and grade of the Hadith when possible. Format as: "The Prophet Muhammad (ﷺ) said in [source]: [Hadith text]"
+      3) **Hadith Analysis**: Include AT LEAST THREE relevant Hadith that discuss similar dream symbols or themes. Include the full chain of narration and grade of the Hadith when possible. Format as: "The Prophet Muhammad (ﷺ) said in [source]: [Hadith text]"
       
       4) **Detailed Islamic Symbolism**: Analyze each major symbol in the dream according to classical Islamic dream interpretation books like Ibn Sirin's work. Explain the various possible meanings in Islamic context.
       
       5) **Spiritual Guidance**: Provide specific spiritual advice based on the dream's interpretation, including recommended duas, dhikr, or actions the dreamer might take.
+
+      6) **Contemporary Perspective**: Add a section providing a modern psychological or general interpretation perspective, clearly labeled as "Non-Islamic Interpretation Perspective" to differentiate it from the Islamic analysis.
       
       Use phrases like "In the light of Islamic teachings...", "The scholars of dream interpretation mention...", and maintain a supportive, encouraging tone while staying true to Islamic principles.
       
       Emphasize important concepts by wrapping them in ** asterisks **. Keep the tone warm and personal while maintaining Islamic authenticity.
       
-      Make sure to provide a complete, unabbreviated interpretation that covers all aspects thoroughly.`
+      Make sure to provide a complete, unabbreviated interpretation that covers all aspects thoroughly. Do not cut off any section.`
       : `You are Dream Baba, a warm and insightful dream interpreter with a gentle, friendly tone. Address the dreamer by their first name and speak as if you're having an intimate conversation. Your interpretations should feel like wisdom from a trusted friend and spiritual guide.
 
       Use their first name frequently throughout the response to make it personal. Emphasize important concepts by wrapping them in ** asterisks **.
@@ -100,7 +103,7 @@ serve(async (req) => {
           },
           { role: 'user', content: `Dreamer's name: ${firstName}\nDream: ${dream}` }
         ],
-        max_tokens: 2500, // Increased token limit for longer responses
+        max_tokens: 3000,
         temperature: 0.7
       }),
     });
@@ -117,10 +120,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "dall-e-3",
-        prompt: `Create a single dreamlike, artistic interpretation of this dream without any text, words, or writing of any kind: ${dream}. Style: ${
+        prompt: `Create a single dreamlike, artistic interpretation of this dream without any text, words, writing, or calligraphy of any kind: ${dream}. Style: ${
           useIslamicInterpretation 
-            ? 'Islamic geometric patterns, arabesque design elements, subtle and respectful imagery without human figures, focusing on abstract patterns and nature elements in Islamic art style. Absolutely no text or calligraphy.' 
-            : 'surreal, ethereal, dreamlike quality, artistic, meaningful symbolism. No text or writing of any kind.'
+            ? 'Islamic geometric patterns, arabesque design elements, subtle and respectful imagery without human figures or faces, focusing on abstract patterns and nature elements in Islamic art style. The image must be completely free of any text, calligraphy, or writing.' 
+            : 'surreal, ethereal, dreamlike quality, artistic, meaningful symbolism. The image must be completely free of any text or writing.'
         }`,
         n: 1,
         size: "1024x1024",
@@ -131,7 +134,7 @@ serve(async (req) => {
     const imageData = await imageResponse.json();
     const imageUrl = imageData.data[0].url;
 
-    // Parse the sections based on the interpretation type
+    // Parse the sections
     let sections;
     if (useIslamicInterpretation) {
       const parts = analysis.split(/\d\)/).filter(Boolean);
@@ -139,7 +142,7 @@ serve(async (req) => {
         interpretation: parts[0]?.trim() || '',
         symbolism: parts[3]?.trim() || '', // Islamic symbolism section
         emotional_analysis: parts[2]?.trim() || '', // Hadith analysis
-        detailed_interpretation: `${parts[1]?.trim() || ''}\n\n${parts[4]?.trim() || ''}` // Combining Quranic references and spiritual guidance
+        detailed_interpretation: `${parts[1]?.trim() || ''}\n\n${parts[4]?.trim() || ''}\n\n${parts[5]?.trim() || ''}` // Combining Quranic references, spiritual guidance, and contemporary perspective
       };
     } else {
       const parts = analysis.split(/\d\)/).filter(Boolean);
@@ -150,6 +153,19 @@ serve(async (req) => {
         detailed_interpretation: parts[3]?.trim() || ''
       };
     }
+
+    // Track OpenAI usage
+    const tokensUsed = interpretationData.usage.total_tokens;
+    await supabase
+      .from('openai_usage')
+      .insert([
+        {
+          user_id: userId,
+          tokens_used: tokensUsed,
+          model_name: 'gpt-4o',
+          request_type: 'dream_interpretation'
+        }
+      ]);
 
     return new Response(
       JSON.stringify({
