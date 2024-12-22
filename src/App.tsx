@@ -43,7 +43,7 @@ function App() {
                 <div className="flex items-center justify-between h-16">
                   <Link to="/" className="flex items-center gap-4">
                     <img
-                      src="/lovable-uploads/60deec4a-9022-4457-9604-b4348f876c2a.png"
+                      src="/lovable-uploads/9d7c542e-59e6-4b50-873b-f6410e5195ed.png"
                       alt="Dream Baba"
                       className="w-12 h-12"
                     />
@@ -51,35 +51,32 @@ function App() {
                       Dream Baba
                     </h1>
                   </Link>
-                  <div className="hidden md:flex items-center gap-4">
+                  <div className="flex items-center gap-4">
                     <Button variant="ghost" asChild className="flex items-center gap-2">
                       <Link to="/journal">
                         <CalendarDays className="h-5 w-5" />
-                        Dream Journal
+                        <span className="hidden md:inline">Dream Journal</span>
                       </Link>
                     </Button>
                     <Button variant="ghost" asChild className="flex items-center gap-2">
                       <Link to="/reports">
                         <LineChart className="h-5 w-5" />
-                        Reports
+                        <span className="hidden md:inline">Reports</span>
                       </Link>
                     </Button>
                     <Button variant="ghost" asChild className="flex items-center gap-2">
                       <Link to="/profile">
                         <Settings className="h-5 w-5" />
-                        Profile
+                        <span className="hidden md:inline">Profile</span>
                       </Link>
                     </Button>
                     <Button variant="ghost" asChild className="flex items-center gap-2">
                       <Link to="/admin">
                         <Shield className="h-5 w-5" />
-                        Admin
+                        <span className="hidden md:inline">Admin</span>
                       </Link>
                     </Button>
                     <ThemeToggle />
-                    <AuthButton />
-                  </div>
-                  <div className="md:hidden">
                     <AuthButton />
                   </div>
                 </div>
