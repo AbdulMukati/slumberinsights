@@ -46,18 +46,18 @@ const Navigation = () => {
       }
 
       try {
-        const { data: profile, error } = await supabase
+        const { data, error } = await supabase
           .from("profiles")
           .select("is_admin")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error("Error fetching admin status:", error);
           return;
         }
 
-        setIsAdmin(profile?.is_admin || false);
+        setIsAdmin(data?.is_admin || false);
       } catch (error) {
         console.error("Error in checkAdminStatus:", error);
       }

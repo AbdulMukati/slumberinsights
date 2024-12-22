@@ -27,7 +27,7 @@ const Profile = () => {
           .from("profiles")
           .select("full_name")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error("Error fetching profile:", error);
@@ -40,7 +40,7 @@ const Profile = () => {
         }
 
         if (data) {
-          setFullName(data.full_name);
+          setFullName(data.full_name || "");
         }
       } catch (error) {
         console.error("Error in fetchProfile:", error);
@@ -63,7 +63,11 @@ const Profile = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .upsert({ id: user.id, full_name: fullName });
+        .upsert({ 
+          id: user.id, 
+          full_name: fullName,
+          updated_at: new Date().toISOString()
+        });
 
       if (error) throw error;
 
