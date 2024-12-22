@@ -46,7 +46,7 @@ const Index = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model: "gpt-3.5-turbo",
           messages: [
             {
               role: 'system',
@@ -64,9 +64,8 @@ const Index = () => {
       if (!response.ok) {
         const errorData = await response.json();
         
-        // Handle quota exceeded error specifically
         if (response.status === 429) {
-          localStorage.removeItem('OPENAI_API_KEY'); // Clear the invalid API key
+          localStorage.removeItem('OPENAI_API_KEY');
           setShowApiKeyDialog(true);
           throw new Error("Your OpenAI API key has exceeded its quota. Please update your API key or check your billing details.");
         }
