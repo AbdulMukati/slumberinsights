@@ -12,7 +12,12 @@ import AuthButton from "@/components/AuthButton";
 interface DreamEntry {
   dream: string;
   interpretation: string;
+  symbolism: string;
+  emotional_analysis: string;
+  detailed_interpretation: string;
   date: string;
+  title: string;
+  image_url?: string;
 }
 
 const Index = () => {
@@ -41,6 +46,11 @@ const Index = () => {
       const newDream: DreamEntry = {
         dream: dreamText,
         interpretation: data.interpretation,
+        symbolism: data.symbolism,
+        emotional_analysis: data.emotional_analysis,
+        detailed_interpretation: data.detailed_interpretation,
+        title: data.title,
+        image_url: data.image_url,
         date: new Date().toISOString()
       };
       
@@ -50,12 +60,21 @@ const Index = () => {
           user_id: user.id,
           dream: dreamText,
           interpretation: data.interpretation,
+          symbolism: data.symbolism,
+          emotional_analysis: data.emotional_analysis,
+          detailed_interpretation: data.detailed_interpretation,
+          title: data.title,
+          image_url: data.image_url,
           created_at: new Date().toISOString()
         }]);
 
       if (saveError) throw saveError;
       
       setCurrentDream(newDream);
+      toast({
+        title: "Success",
+        description: "Your dream has been interpreted and saved to your journal.",
+      });
     } catch (error) {
       toast({
         title: "Error",
