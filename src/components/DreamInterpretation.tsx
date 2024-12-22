@@ -16,7 +16,7 @@ interface DreamInterpretationProps {
     symbolism: string;
     emotional_analysis: string;
     detailed_interpretation: string;
-    date: string;
+    created_at: string;
     title: string;
     image_url?: string;
     emotion_before?: string;
@@ -36,6 +36,12 @@ const DreamInterpretation = ({ dream }: DreamInterpretationProps) => {
   const [emotionAfter, setEmotionAfter] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+
+  const formatSection = (text: string) => {
+    return text.split('\n').map((line, index) => (
+      <p key={index} className="mb-2">{line}</p>
+    ));
+  };
 
   const handleSaveNotes = async () => {
     if (!notes.trim() || !emotionAfter) return;
@@ -103,24 +109,32 @@ const DreamInterpretation = ({ dream }: DreamInterpretationProps) => {
               )}
             </div>
 
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Brief Interpretation</h3>
-              <p className="text-gray-700 dark:text-gray-300">{dream.interpretation}</p>
+            <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg">
+              <h3 className="text-lg font-semibold mb-2">Initial Thoughts</h3>
+              <div className="text-gray-700 dark:text-gray-300">
+                {formatSection(dream.interpretation)}
+              </div>
             </div>
 
-            <div>
+            <div className="p-4 bg-purple-50/50 dark:bg-purple-900/20 rounded-lg">
               <h3 className="text-lg font-semibold mb-2">Symbolic Analysis</h3>
-              <p className="text-gray-700 dark:text-gray-300">{dream.symbolism}</p>
+              <div className="text-gray-700 dark:text-gray-300">
+                {formatSection(dream.symbolism)}
+              </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Emotional Analysis</h3>
-              <p className="text-gray-700 dark:text-gray-300">{dream.emotional_analysis}</p>
+            <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg">
+              <h3 className="text-lg font-semibold mb-2">Emotional Insights</h3>
+              <div className="text-gray-700 dark:text-gray-300">
+                {formatSection(dream.emotional_analysis)}
+              </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Detailed Personal Interpretation</h3>
-              <p className="text-gray-700 dark:text-gray-300">{dream.detailed_interpretation}</p>
+            <div className="p-4 bg-purple-50/50 dark:bg-purple-900/20 rounded-lg">
+              <h3 className="text-lg font-semibold mb-2">Personal Reflection</h3>
+              <div className="text-gray-700 dark:text-gray-300">
+                {formatSection(dream.detailed_interpretation)}
+              </div>
             </div>
 
             <div className="space-y-4 border-t pt-6">

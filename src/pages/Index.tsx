@@ -63,6 +63,16 @@ const Index = () => {
       return;
     }
 
+    if (!userName) {
+      toast({
+        title: "Profile Incomplete",
+        description: "Please complete your profile with your name first.",
+        variant: "destructive"
+      });
+      // Here you could navigate to a profile completion page
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('interpret-dream', {
@@ -83,7 +93,6 @@ const Index = () => {
           title: data.title,
           image_url: data.image_url,
           emotion_before: emotionBefore,
-          created_at: new Date().toISOString()
         }])
         .select()
         .single();
