@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DreamListView from "./DreamListView";
 import DreamCalendarView from "./DreamCalendarView";
+import EmotionalTrajectoryReport from "./EmotionalTrajectoryReport";
 
 interface DreamHistoryProps {
   dreams: Array<{
@@ -15,6 +16,9 @@ interface DreamHistoryProps {
     date: string;
     title: string;
     image_url?: string;
+    notes?: string;
+    emotion_before?: string;
+    emotion_after?: string;
   }>;
   onDeleteDream: (id: string) => void;
 }
@@ -34,9 +38,10 @@ const DreamHistory = ({ dreams, onDeleteDream }: DreamHistoryProps) => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
               <TabsTrigger value="list">List View</TabsTrigger>
               <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+              <TabsTrigger value="report">Reports</TabsTrigger>
             </TabsList>
 
             <TabsContent value="list">
@@ -45,6 +50,10 @@ const DreamHistory = ({ dreams, onDeleteDream }: DreamHistoryProps) => {
 
             <TabsContent value="calendar">
               <DreamCalendarView dreams={dreams} onDeleteDream={onDeleteDream} />
+            </TabsContent>
+
+            <TabsContent value="report">
+              <EmotionalTrajectoryReport dreams={dreams} />
             </TabsContent>
           </Tabs>
         </CardContent>

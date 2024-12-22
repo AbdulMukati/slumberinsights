@@ -25,6 +25,9 @@ interface DreamListItemProps {
     date: string;
     title: string;
     image_url?: string;
+    notes?: string;
+    emotion_before?: string;
+    emotion_after?: string;
   };
   isExpanded: boolean;
   onToggle: () => void;
@@ -33,9 +36,7 @@ interface DreamListItemProps {
 
 const DreamListItem = ({ dream, isExpanded, onToggle, onDelete }: DreamListItemProps) => {
   return (
-    <motion.div
-      className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/30"
-    >
+    <motion.div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/30">
       <div className="flex justify-between items-center mb-2">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">
@@ -75,11 +76,7 @@ const DreamListItem = ({ dream, isExpanded, onToggle, onDelete }: DreamListItemP
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggle}
-          >
+          <Button variant="ghost" size="icon" onClick={onToggle}>
             {isExpanded ? (
               <ChevronUp className="h-4 w-4" />
             ) : (
@@ -109,6 +106,22 @@ const DreamListItem = ({ dream, isExpanded, onToggle, onDelete }: DreamListItemP
               <h4 className="font-semibold mb-2">Dream</h4>
               <p className="text-gray-700 dark:text-gray-300">{dream.dream}</p>
             </div>
+            {(dream.emotion_before || dream.emotion_after) && (
+              <div className="flex gap-4">
+                {dream.emotion_before && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Initial Feeling</h4>
+                    <p className="text-2xl">{dream.emotion_before}</p>
+                  </div>
+                )}
+                {dream.emotion_after && (
+                  <div>
+                    <h4 className="font-semibold mb-2">After Interpretation</h4>
+                    <p className="text-2xl">{dream.emotion_after}</p>
+                  </div>
+                )}
+              </div>
+            )}
             <div>
               <h4 className="font-semibold mb-2">Interpretation</h4>
               <p className="text-gray-700 dark:text-gray-300">{dream.interpretation}</p>
@@ -125,6 +138,12 @@ const DreamListItem = ({ dream, isExpanded, onToggle, onDelete }: DreamListItemP
               <h4 className="font-semibold mb-2">Detailed Interpretation</h4>
               <p className="text-gray-700 dark:text-gray-300">{dream.detailed_interpretation}</p>
             </div>
+            {dream.notes && (
+              <div>
+                <h4 className="font-semibold mb-2">Your Notes</h4>
+                <p className="text-gray-700 dark:text-gray-300">{dream.notes}</p>
+              </div>
+            )}
           </motion.div>
         ) : (
           <p className="text-gray-700 dark:text-gray-300 line-clamp-2">
