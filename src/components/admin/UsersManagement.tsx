@@ -18,13 +18,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type SubscriptionPlan = 'free' | 'monthly' | 'yearly';
+
 interface Profile {
   id: string;
   full_name: string;
   created_at: string;
   is_admin: boolean;
   subscribed: boolean;
-  subscription_plan: 'free' | 'monthly' | 'yearly' | null;
+  subscription_plan: SubscriptionPlan | null;
 }
 
 const UsersManagement = () => {
@@ -77,7 +79,7 @@ const UsersManagement = () => {
     }
   };
 
-  const updateSubscriptionPlan = async (userId: string, plan: string) => {
+  const updateSubscriptionPlan = async (userId: string, plan: SubscriptionPlan) => {
     try {
       const { error } = await supabase
         .from("profiles")
@@ -133,7 +135,7 @@ const UsersManagement = () => {
               <TableCell>
                 <Select
                   value={user.subscription_plan || 'free'}
-                  onValueChange={(value) => updateSubscriptionPlan(user.id, value)}
+                  onValueChange={(value: SubscriptionPlan) => updateSubscriptionPlan(user.id, value)}
                 >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select plan" />
