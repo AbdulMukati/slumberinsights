@@ -43,7 +43,7 @@ function App() {
                 <div className="flex items-center justify-between h-16">
                   <Link to="/" className="flex items-center gap-4">
                     <img
-                      src="/lovable-uploads/82a43a54-df6e-4d0d-a305-70c2c6f894e9.png"
+                      src="/lovable-uploads/36ba7516-2b38-4daa-989c-15de8e600de8.png"
                       alt="Dream Baba"
                       className="w-12 h-12"
                     />

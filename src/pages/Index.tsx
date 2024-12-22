@@ -152,7 +152,7 @@ const Index = () => {
       >
         <div className="text-center mb-12">
           <img
-            src="/lovable-uploads/82a43a54-df6e-4d0d-a305-70c2c6f894e9.png"
+            src="/lovable-uploads/36ba7516-2b38-4daa-989c-15de8e600de8.png"
             alt="Dream Baba"
             className="w-48 h-48 mx-auto mb-8"
           />
