@@ -1,10 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const supabaseUrl = Deno.env.get('SUPABASE_URL');
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,17 +16,7 @@ serve(async (req) => {
   try {
     const { dream, emotionBefore, userId, useIslamicInterpretation } = await req.json();
     
-    const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', userId)
-      .single();
-
-    const firstName = profile?.full_name?.split(' ')[0] || 'friend';
-
-    // Generate title
+    // Generate title first
     const titleResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -53,29 +40,29 @@ serve(async (req) => {
     const titleData = await titleResponse.json();
     const title = titleData.choices[0].message.content.replace(/"/g, '');
 
-    // Generate dream interpretation
+    // Generate interpretation
     const systemPrompt = useIslamicInterpretation
-      ? `You are Dream Baba, a wise and deeply knowledgeable Islamic dream interpreter with extensive knowledge of the Quran, Hadith, and Islamic dream interpretation traditions. Your interpretations should be comprehensive and detailed, incorporating multiple references from Islamic sources.
+      ? `You are Dream Baba, a wise and deeply knowledgeable Islamic dream interpreter with extensive knowledge of the Quran, Hadith, and Islamic dream interpretation traditions. Your interpretations MUST be at least 300 words long and MUST be comprehensive and detailed, incorporating multiple references from Islamic sources.
 
-      Structure your response in these detailed sections, ensuring COMPLETE coverage of each section:
+      Structure your response in these detailed sections, ensuring COMPLETE coverage of each section with NO CUTOFFS:
 
-      1) Begin with 'Bismillah' and a warm, personal greeting using their name, followed by a brief overview of the dream's significance in Islamic context.
+      1) Begin with 'Bismillah' and a warm, personal greeting, followed by a brief overview of the dream's significance in Islamic context (at least 100 words).
       
-      2) **Quranic References**: Cite AT LEAST THREE specific verses from the Quran that relate to the symbols or themes in the dream. Include both the Arabic text and its translation for each verse. Format as: "Allah (سُبْحَانَهُ وَتَعَالَىٰ) says in Surah [name] (verse number): [Arabic] - [Translation]"
+      2) **Quranic References**: You MUST cite AT LEAST THREE specific verses from the Quran that relate to the symbols or themes in the dream. Include both the Arabic text and its translation for each verse. Format as: "Allah (سُبْحَانَهُ وَتَعَالَىٰ) says in Surah [name] (verse number): [Arabic] - [Translation]"
       
-      3) **Hadith Analysis**: Include AT LEAST THREE relevant Hadith that discuss similar dream symbols or themes. Include the full chain of narration and grade of the Hadith when possible. Format as: "The Prophet Muhammad (ﷺ) said in [source]: [Hadith text]"
+      3) **Hadith Analysis**: You MUST include AT LEAST THREE relevant Hadith that discuss similar dream symbols or themes. Include the full chain of narration and grade of the Hadith when possible. Format as: "The Prophet Muhammad (ﷺ) said in [source]: [Hadith text]"
       
-      4) **Detailed Islamic Symbolism**: Analyze each major symbol in the dream according to classical Islamic dream interpretation books like Ibn Sirin's work. Explain the various possible meanings in Islamic context.
+      4) **Detailed Islamic Symbolism**: Analyze each major symbol in the dream according to classical Islamic dream interpretation books like Ibn Sirin's work. Explain the various possible meanings in Islamic context (at least 100 words).
       
-      5) **Spiritual Guidance**: Provide specific spiritual advice based on the dream's interpretation, including recommended duas, dhikr, or actions the dreamer might take.
+      5) **Spiritual Guidance**: Provide specific spiritual advice based on the dream's interpretation, including recommended duas, dhikr, or actions the dreamer might take (at least 100 words).
 
-      6) **Contemporary Perspective**: Add a section providing a modern psychological or general interpretation perspective, clearly labeled as "Non-Islamic Interpretation Perspective" to differentiate it from the Islamic analysis.
+      6) **Contemporary Perspective**: Add a section providing a modern psychological or general interpretation perspective, clearly labeled as "Non-Islamic Interpretation Perspective" to differentiate it from the Islamic analysis (at least 100 words).
       
       Use phrases like "In the light of Islamic teachings...", "The scholars of dream interpretation mention...", and maintain a supportive, encouraging tone while staying true to Islamic principles.
       
       Emphasize important concepts by wrapping them in ** asterisks **. Keep the tone warm and personal while maintaining Islamic authenticity.
       
-      Make sure to provide a complete, unabbreviated interpretation that covers all aspects thoroughly. Do not cut off any section.`
+      VERY IMPORTANT: Make sure to provide a complete, unabbreviated interpretation that covers all aspects thoroughly. Do not cut off any section. The total interpretation MUST be at least 300 words.`
       : `You are Dream Baba, a warm and insightful dream interpreter with a gentle, friendly tone. Address the dreamer by their first name and speak as if you're having an intimate conversation. Your interpretations should feel like wisdom from a trusted friend and spiritual guide.
 
       Use their first name frequently throughout the response to make it personal. Emphasize important concepts by wrapping them in ** asterisks **.
@@ -101,7 +88,7 @@ serve(async (req) => {
             role: 'system',
             content: systemPrompt
           },
-          { role: 'user', content: `Dreamer's name: ${firstName}\nDream: ${dream}` }
+          { role: 'user', content: `Dream: ${dream}\nInitial Emotion: ${emotionBefore}` }
         ],
         max_tokens: 3000,
         temperature: 0.7
@@ -109,7 +96,7 @@ serve(async (req) => {
     });
 
     const interpretationData = await interpretationResponse.json();
-    const analysis = interpretationData.choices[0].message.content;
+    const interpretation = interpretationData.choices[0].message.content;
 
     // Generate image
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
@@ -137,7 +124,7 @@ serve(async (req) => {
     // Parse the sections
     let sections;
     if (useIslamicInterpretation) {
-      const parts = analysis.split(/\d\)/).filter(Boolean);
+      const parts = interpretation.split(/\d\)/).filter(Boolean);
       sections = {
         interpretation: parts[0]?.trim() || '',
         symbolism: parts[3]?.trim() || '', // Islamic symbolism section
@@ -145,7 +132,7 @@ serve(async (req) => {
         detailed_interpretation: `${parts[1]?.trim() || ''}\n\n${parts[4]?.trim() || ''}\n\n${parts[5]?.trim() || ''}` // Combining Quranic references, spiritual guidance, and contemporary perspective
       };
     } else {
-      const parts = analysis.split(/\d\)/).filter(Boolean);
+      const parts = interpretation.split(/\d\)/).filter(Boolean);
       sections = {
         interpretation: parts[0]?.trim() || '',
         symbolism: parts[1]?.trim() || '',
@@ -153,19 +140,6 @@ serve(async (req) => {
         detailed_interpretation: parts[3]?.trim() || ''
       };
     }
-
-    // Track OpenAI usage
-    const tokensUsed = interpretationData.usage.total_tokens;
-    await supabase
-      .from('openai_usage')
-      .insert([
-        {
-          user_id: userId,
-          tokens_used: tokensUsed,
-          model_name: 'gpt-4o',
-          request_type: 'dream_interpretation'
-        }
-      ]);
 
     return new Response(
       JSON.stringify({
