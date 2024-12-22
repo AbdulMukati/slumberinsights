@@ -16,7 +16,7 @@ interface DreamEntry {
   symbolism: string;
   emotional_analysis: string;
   detailed_interpretation: string;
-  date: string;
+  created_at: string;
   title: string;
   image_url?: string;
   emotion_before?: string;
@@ -38,16 +38,23 @@ const Index = () => {
           .from('profiles')
           .select('full_name')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
         
         if (data && !error) {
           setUserName(data.full_name);
+        } else if (error) {
+          console.error('Error fetching profile:', error);
+          toast({
+            title: "Error",
+            description: "Could not fetch user profile",
+            variant: "destructive"
+          });
         }
       }
     };
 
     fetchUserName();
-  }, [user]);
+  }, [user, toast]);
 
   const analyzeDream = async (dreamText: string, emotionBefore: string) => {
     if (!user) {
