@@ -61,7 +61,18 @@ const Index = () => {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to analyze dream');
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Handle quota exceeded error specifically
+        if (response.status === 429) {
+          localStorage.removeItem('OPENAI_API_KEY'); // Clear the invalid API key
+          setShowApiKeyDialog(true);
+          throw new Error("Your OpenAI API key has exceeded its quota. Please update your API key or check your billing details.");
+        }
+        
+        throw new Error(errorData.error?.message || 'Failed to analyze dream');
+      }
       
       const data = await response.json();
       const interpretation = data.choices[0].message.content;
@@ -77,9 +88,12 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to analyze your dream. Please check your API key and try again.",
+        description: error instanceof Error ? error.message : "Failed to analyze your dream. Please try again.",
         variant: "destructive"
       });
+      if (error instanceof Error && error.message.includes('quota')) {
+        setShowApiKeyDialog(true);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +109,7 @@ const Index = () => {
       setShowApiKeyDialog(false);
       toast({
         title: "Success",
-        description: "API key has been saved successfully.",
+        description: "API key has been updated successfully.",
       });
     }
   };
@@ -130,9 +144,9 @@ const Index = () => {
           <AlertDialogContent>
             <form onSubmit={handleApiKeySubmit}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Enter OpenAI API Key</AlertDialogTitle>
+                <AlertDialogTitle>Update OpenAI API Key</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Please enter your OpenAI API key to use the dream interpretation feature.
+                  Your current API key has exceeded its quota or is invalid. Please enter a new OpenAI API key to continue using the dream interpretation feature.
                   You can get your API key from the OpenAI website.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -147,7 +161,7 @@ const Index = () => {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction type="submit">Save API Key</AlertDialogAction>
+                <AlertDialogAction type="submit">Update API Key</AlertDialogAction>
               </AlertDialogFooter>
             </form>
           </AlertDialogContent>
