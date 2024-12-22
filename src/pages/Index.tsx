@@ -26,11 +26,11 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentDream, setCurrentDream] = useState<DreamEntry | null>(null);
   const [history, setHistory] = useState<DreamEntry[]>([]);
-  const [showApiKeyDialog, setShowApiKeyDialog] = useState(!localStorage.getItem('PERPLEXITY_API_KEY'));
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(!localStorage.getItem('OPENAI_API_KEY'));
   const { toast } = useToast();
 
   const analyzeDream = async (dreamText: string) => {
-    const apiKey = localStorage.getItem('PERPLEXITY_API_KEY');
+    const apiKey = localStorage.getItem('OPENAI_API_KEY');
     
     if (!apiKey) {
       setShowApiKeyDialog(true);
@@ -39,14 +39,14 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.1-sonar-small-128k-online',
+          model: "gpt-4",
           messages: [
             {
               role: 'system',
@@ -91,7 +91,7 @@ const Index = () => {
     const apiKey = formData.get('apiKey') as string;
     
     if (apiKey) {
-      localStorage.setItem('PERPLEXITY_API_KEY', apiKey);
+      localStorage.setItem('OPENAI_API_KEY', apiKey);
       setShowApiKeyDialog(false);
       toast({
         title: "Success",
@@ -130,10 +130,10 @@ const Index = () => {
           <AlertDialogContent>
             <form onSubmit={handleApiKeySubmit}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Enter Perplexity API Key</AlertDialogTitle>
+                <AlertDialogTitle>Enter OpenAI API Key</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Please enter your Perplexity API key to use the dream interpretation feature.
-                  You can get your API key from the Perplexity website.
+                  Please enter your OpenAI API key to use the dream interpretation feature.
+                  You can get your API key from the OpenAI website.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="my-4">
