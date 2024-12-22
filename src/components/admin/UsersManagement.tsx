@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Ban, RefreshCw, Shield } from "lucide-react";
+import { RefreshCw, Shield } from "lucide-react";
 
 const UsersManagement = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -21,9 +21,10 @@ const UsersManagement = () => {
   }, []);
 
   const fetchUsers = async () => {
+    // First get all profiles
     const { data: profiles, error } = await supabase
       .from("profiles")
-      .select("*, auth_users:id(email, created_at)");
+      .select("*");
 
     if (error) {
       toast({
@@ -34,7 +35,20 @@ const UsersManagement = () => {
       return;
     }
 
-    setUsers(profiles);
+    // Then get auth users data
+    const { data: authUsers } = await supabase.auth.admin.listUsers();
+    
+    // Combine the data
+    const enrichedProfiles = profiles.map(profile => {
+      const authUser = authUsers?.users.find(u => u.id === profile.id);
+      return {
+        ...profile,
+        email: authUser?.email,
+        created_at: authUser?.created_at
+      };
+    });
+
+    setUsers(enrichedProfiles);
   };
 
   const resetPassword = async (email: string) => {
@@ -95,17 +109,17 @@ const UsersManagement = () => {
           {users.map((user) => (
             <TableRow key={user.id}>
               <TableCell>{user.full_name}</TableCell>
-              <TableCell>{user.auth_users?.email}</TableCell>
+              <TableCell>{user.email}</TableCell>
               <TableCell>{user.is_admin ? "Yes" : "No"}</TableCell>
               <TableCell>
-                {new Date(user.auth_users?.created_at).toLocaleDateString()}
+                {new Date(user.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => resetPassword(user.auth_users?.email)}
+                    onClick={() => resetPassword(user.email)}
                     title="Reset Password"
                   >
                     <RefreshCw className="h-4 w-4" />

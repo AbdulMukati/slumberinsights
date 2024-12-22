@@ -29,9 +29,10 @@ const OpenAIUsage = () => {
   }, []);
 
   const fetchUsageData = async () => {
+    // First get all usage data
     const { data: usage, error } = await supabase
       .from("openai_usage")
-      .select("*, profiles:user_id(full_name)");
+      .select("*");
 
     if (error) {
       toast({
@@ -42,15 +43,31 @@ const OpenAIUsage = () => {
       return;
     }
 
-    setUsageData(usage);
+    // Then get profiles data separately
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name");
+
+    // Create a map of user IDs to names
+    const userNames = Object.fromEntries(
+      (profiles || []).map((p) => [p.id, p.full_name])
+    );
+
+    // Combine the data
+    const enrichedUsage = usage.map((u) => ({
+      ...u,
+      user_name: userNames[u.user_id] || "Unknown User",
+    }));
+
+    setUsageData(enrichedUsage);
 
     // Calculate totals per user
-    const totals = usage.reduce((acc: any, curr: any) => {
+    const totals = enrichedUsage.reduce((acc: any, curr: any) => {
       const userId = curr.user_id;
       if (!acc[userId]) {
         acc[userId] = {
           user_id: userId,
-          user_name: curr.profiles?.full_name,
+          user_name: curr.user_name,
           total_tokens: 0,
         };
       }
@@ -91,7 +108,7 @@ const OpenAIUsage = () => {
           <TableBody>
             {usageData.map((usage) => (
               <TableRow key={usage.id}>
-                <TableCell>{usage.profiles?.full_name}</TableCell>
+                <TableCell>{usage.user_name}</TableCell>
                 <TableCell>{usage.tokens_used}</TableCell>
                 <TableCell>{usage.model_name}</TableCell>
                 <TableCell>{usage.request_type}</TableCell>
