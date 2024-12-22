@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DreamForm from "@/components/DreamForm";
 import DreamInterpretation from "@/components/DreamInterpretation";
 import SignUpWall from "@/components/SignUpWall";
+import LoadingDream from "@/components/LoadingDream";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -94,7 +95,11 @@ const Index = () => {
         ) : (
           <>
             <DreamForm onSubmit={handleDreamSubmit} isLoading={isLoading} />
-            {dreamData && <DreamInterpretation dream={dreamData} />}
+            {isLoading ? (
+              <LoadingDream />
+            ) : (
+              dreamData && <DreamInterpretation dream={dreamData} />
+            )}
           </>
         )}
       </div>

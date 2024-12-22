@@ -13,19 +13,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const EMOTIONS_MAP = {
-  "😊": 5,
-  "😌": 4,
-  "😕": 3,
-  "😨": 2,
-  "😢": 1,
+  "😊": 100, // Happy
+  "😌": 75,  // Calm
+  "😕": 50,  // Confused
+  "😨": 25,  // Anxious
+  "😢": 5,   // Sad
 };
 
 const REVERSE_EMOTIONS_MAP = {
-  5: "😊",
-  4: "😌",
-  3: "😕",
-  2: "😨",
-  1: "😢",
+  100: "😊",
+  75: "😌",
+  50: "😕",
+  25: "😨",
+  5: "😢",
 };
 
 interface EmotionalTrajectoryReportProps {
@@ -103,8 +103,8 @@ const EmotionalTrajectoryReport = ({ dreams }: EmotionalTrajectoryReportProps) =
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis
-                domain={[1, 5]}
-                ticks={[1, 2, 3, 4, 5]}
+                domain={[0, 100]}
+                ticks={[5, 25, 50, 75, 100]}
                 tickFormatter={(value) => REVERSE_EMOTIONS_MAP[value as keyof typeof REVERSE_EMOTIONS_MAP]}
               />
               <Tooltip content={<CustomTooltip />} />
@@ -126,6 +126,22 @@ const EmotionalTrajectoryReport = ({ dreams }: EmotionalTrajectoryReportProps) =
               />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+        <div className="mt-4 grid grid-cols-5 gap-4">
+          {[
+            { emoji: "😢", label: "Sad" },
+            { emoji: "😨", label: "Anxious" },
+            { emoji: "😕", label: "Confused" },
+            { emoji: "😌", label: "Calm" },
+            { emoji: "😊", label: "Happy" },
+          ].map(({ emoji, label }) => (
+            <div key={emoji} className="text-center">
+              <span className="text-4xl">{emoji}</span>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                {label}
+              </p>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

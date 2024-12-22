@@ -75,7 +75,7 @@ serve(async (req) => {
     const sections = analysis.split(/\d\)/).filter(Boolean);
     const [interpretation, symbolism, emotional, detailed] = sections.map(s => s.trim());
 
-    // Generate image
+    // Generate image without text
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -84,9 +84,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "dall-e-3",
-        prompt: `Create a dreamy, artistic interpretation of this dream: ${dream}. Style: surreal, ethereal, dreamlike quality, artistic, meaningful symbolism.`,
+        prompt: `Create a single dreamlike, artistic interpretation of this dream without any text or words: ${dream}. Style: surreal, ethereal, dreamlike quality, artistic, meaningful symbolism. Do not include any text or letters in the image.`,
         n: 1,
-        size: "1024x1024"
+        size: "1024x1024",
+        quality: "standard"
       }),
     });
 
