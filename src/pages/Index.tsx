@@ -10,10 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 const Index = () => {
   const [dreamData, setDreamData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSignUpWall, setShowSignUpWall] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
   const handleDreamSubmit = async (dream: string, emotionBefore: string) => {
+    if (!user) {
+      setShowSignUpWall(true);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('interpret-dream', {
@@ -67,6 +73,7 @@ const Index = () => {
   };
 
   const handleSignUpComplete = () => {
+    setShowSignUpWall(false);
     toast({
       title: "Welcome!",
       description: "You can now start interpreting your dreams.",
@@ -90,17 +97,16 @@ const Index = () => {
           </p>
         </div>
 
-        {!user ? (
+        <DreamForm onSubmit={handleDreamSubmit} isLoading={isLoading} />
+        
+        {showSignUpWall && (
           <SignUpWall onComplete={handleSignUpComplete} />
+        )}
+        
+        {isLoading ? (
+          <LoadingDream />
         ) : (
-          <>
-            <DreamForm onSubmit={handleDreamSubmit} isLoading={isLoading} />
-            {isLoading ? (
-              <LoadingDream />
-            ) : (
-              dreamData && <DreamInterpretation dream={dreamData} />
-            )}
-          </>
+          dreamData && <DreamInterpretation dream={dreamData} />
         )}
       </div>
     </div>

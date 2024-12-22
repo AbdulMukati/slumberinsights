@@ -11,7 +11,6 @@ import Profile from "@/pages/Profile";
 import Admin from "@/pages/Admin";
 import Reports from "@/pages/Reports";
 import AuthButton from "@/components/AuthButton";
-import "./App.css";
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -34,10 +33,10 @@ const ThemeToggle = () => {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="dream-baba-theme">
+    <ThemeProvider defaultTheme="light" storageKey="dream-baba-theme">
       <AuthProvider>
         <Router>
-          <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
+          <div className="min-h-screen bg-white dark:from-purple-900 dark:to-blue-900 dark:bg-gradient-to-b">
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
               <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
