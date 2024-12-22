@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import DreamHistory from "@/components/DreamHistory";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Home } from "lucide-react";
 
 const Journal = () => {
   const [dreams, setDreams] = useState([]);
@@ -23,19 +25,22 @@ const Journal = () => {
     try {
       const { data, error } = await supabase
         .from("dreams")
-        .select("dream, interpretation, symbolism, emotional_analysis, detailed_interpretation, created_at")
+        .select("*, id")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
       setDreams(
         data.map((dream) => ({
+          id: dream.id,
           dream: dream.dream,
           interpretation: dream.interpretation,
           symbolism: dream.symbolism,
           emotional_analysis: dream.emotional_analysis,
           detailed_interpretation: dream.detailed_interpretation,
           date: new Date(dream.created_at).toISOString(),
+          title: dream.title || "Untitled Dream",
+          image_url: dream.image_url,
         }))
       );
     } catch (error) {
@@ -47,13 +52,46 @@ const Journal = () => {
     }
   };
 
+  const handleDeleteDream = async (dreamId: string) => {
+    try {
+      const { error } = await supabase
+        .from("dreams")
+        .delete()
+        .eq("id", dreamId);
+
+      if (error) throw error;
+
+      setDreams(dreams.filter((dream) => dream.id !== dreamId));
+      toast({
+        title: "Success",
+        description: "Dream deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete dream",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
       <div className="container max-w-4xl mx-auto pt-16 px-4">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 text-purple-900 dark:text-purple-100">
-          Dream Journal
-        </h1>
-        <DreamHistory dreams={dreams} />
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-purple-900 dark:text-purple-100">
+            Dream Journal
+          </h1>
+          <Button
+            onClick={() => navigate("/")}
+            variant="outline"
+            size="icon"
+            className="rounded-full"
+          >
+            <Home className="h-4 w-4" />
+          </Button>
+        </div>
+        <DreamHistory dreams={dreams} onDeleteDream={handleDeleteDream} />
       </div>
     </div>
   );

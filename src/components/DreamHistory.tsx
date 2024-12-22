@@ -6,16 +6,20 @@ import DreamCalendarView from "./DreamCalendarView";
 
 interface DreamHistoryProps {
   dreams: Array<{
+    id: string;
     dream: string;
     interpretation: string;
     symbolism: string;
     emotional_analysis: string;
     detailed_interpretation: string;
     date: string;
+    title: string;
+    image_url?: string;
   }>;
+  onDeleteDream: (id: string) => void;
 }
 
-const DreamHistory = ({ dreams }: DreamHistoryProps) => {
+const DreamHistory = ({ dreams, onDeleteDream }: DreamHistoryProps) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -36,11 +40,11 @@ const DreamHistory = ({ dreams }: DreamHistoryProps) => {
             </TabsList>
 
             <TabsContent value="list">
-              <DreamListView dreams={dreams} />
+              <DreamListView dreams={dreams} onDeleteDream={onDeleteDream} />
             </TabsContent>
 
             <TabsContent value="calendar">
-              <DreamCalendarView dreams={dreams} />
+              <DreamCalendarView dreams={dreams} onDeleteDream={onDeleteDream} />
             </TabsContent>
           </Tabs>
         </CardContent>
