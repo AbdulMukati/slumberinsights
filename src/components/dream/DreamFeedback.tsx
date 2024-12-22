@@ -66,7 +66,9 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
   return (
     <div className="space-y-6 border-t pt-6">
       <div>
-        <Label className="text-lg mb-4 block">How do you feel after reading the interpretation?</Label>
+        <Label className="text-lg mb-4 block font-semibold">
+          How do you feel after reading the interpretation?
+        </Label>
         <RadioGroup
           value={emotionAfter}
           onValueChange={setEmotionAfter}
@@ -77,7 +79,7 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
               <RadioGroupItem value={value} id={`emotion-after-${value}`} />
               <Label
                 htmlFor={`emotion-after-${value}`}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 cursor-pointer"
               >
                 <span className="text-2xl">{value}</span>
                 <span>{label}</span>
@@ -88,7 +90,9 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
       </div>
 
       <div>
-        <Label htmlFor="notes" className="text-lg mb-4 block">Your Notes (Optional)</Label>
+        <Label htmlFor="notes" className="text-lg mb-4 block font-semibold">
+          Your Notes (Optional)
+        </Label>
         <Textarea
           id="notes"
           value={notes}

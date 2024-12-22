@@ -54,7 +54,7 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
     if (GIBBERISH_PATTERN.test(text.replace(/\s/g, ''))) {
       return {
         isValid: false,
-        message: "I see you're testing the system! Have you considered a career in QA? If not, why not share a real dream instead? 😊"
+        message: "Are you a QA engineer? Because you're doing a great job testing! When you're ready, why not share a real dream with me? I'd love to help interpret it. 😊"
       };
     }
 
@@ -90,7 +90,7 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
       {user && !userName && <NoNamePrompt />}
       
       <div className="space-y-4">
-        <Label htmlFor="dream" className="text-lg">
+        <Label htmlFor="dream" className="text-lg font-semibold">
           Tell me about your dream
         </Label>
         <Textarea
