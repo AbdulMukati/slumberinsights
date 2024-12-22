@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -21,6 +21,7 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+      className="rounded-full"
     >
       {theme === "light" ? (
         <Moon className="h-5 w-5" />
@@ -37,23 +38,39 @@ function App() {
       <AuthProvider>
         <Router>
           <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
-            <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between py-4">
-                <div className="flex items-center gap-4">
-                  <img
-                    src="/lovable-uploads/15f3fbaa-0385-4a7e-95ae-ca76c1417489.png"
-                    alt="Dream Baba"
-                    className="w-12 h-12"
-                  />
-                  <h1 className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                    Dream Baba
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ThemeToggle />
-                  <AuthButton />
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
+              <div className="container mx-auto px-4">
+                <div className="flex items-center justify-between h-16">
+                  <Link to="/" className="flex items-center gap-4">
+                    <img
+                      src="/lovable-uploads/7cd8c0a1-292b-4b49-a5bd-9a6478c5d82e.png"
+                      alt="Dream Baba"
+                      className="w-12 h-12"
+                    />
+                    <h1 className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                      Dream Baba
+                    </h1>
+                  </Link>
+                  <div className="flex items-center gap-4">
+                    <Link to="/journal">
+                      <Button variant="ghost">Dream Journal</Button>
+                    </Link>
+                    <Link to="/reports">
+                      <Button variant="ghost">Reports</Button>
+                    </Link>
+                    <Link to="/profile">
+                      <Button variant="ghost">Profile</Button>
+                    </Link>
+                    <Link to="/admin">
+                      <Button variant="ghost">Admin</Button>
+                    </Link>
+                    <ThemeToggle />
+                    <AuthButton />
+                  </div>
                 </div>
               </div>
+            </nav>
+            <div className="pt-16">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/journal" element={<Journal />} />

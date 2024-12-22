@@ -11,7 +11,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { EMOTIONS } from "@/components/dream/EmotionSelector";
@@ -36,8 +35,9 @@ const Reports = () => {
         return;
       }
 
-      // Calculate percentages for before emotions
       const totalDreams = dreams.length;
+      
+      // Calculate percentages for before emotions
       const beforeCounts = EMOTIONS.map((emotion) => {
         const count = dreams.filter(
           (d) => d.emotion_before === emotion.value
@@ -98,7 +98,9 @@ const Reports = () => {
                   <YAxis
                     dataKey="emotion"
                     type="category"
-                    tickFormatter={(value) => `${value}`}
+                    tickFormatter={(value) => (
+                      <text style={{ fontSize: '24px' }}>{value}</text>
+                    )}
                   />
                   <Tooltip
                     formatter={(value: number) => [`${value}%`, "Frequency"]}
@@ -113,6 +115,16 @@ const Reports = () => {
                   />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+            <div className="mt-4 grid grid-cols-5 gap-4">
+              {EMOTIONS.map((emotion) => (
+                <div key={emotion.value} className="text-center">
+                  <span className="text-4xl">{emotion.value}</span>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                    {emotion.label}
+                  </p>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -130,7 +142,9 @@ const Reports = () => {
                   <YAxis
                     dataKey="emotion"
                     type="category"
-                    tickFormatter={(value) => `${value}`}
+                    tickFormatter={(value) => (
+                      <text style={{ fontSize: '24px' }}>{value}</text>
+                    )}
                   />
                   <Tooltip
                     formatter={(value: number) => [`${value}%`, "Frequency"]}
@@ -146,23 +160,18 @@ const Reports = () => {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            <div className="mt-4 grid grid-cols-5 gap-4">
+              {EMOTIONS.map((emotion) => (
+                <div key={emotion.value} className="text-center">
+                  <span className="text-4xl">{emotion.value}</span>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                    {emotion.label}
+                  </p>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
-
-        {/* Emoji Legend */}
-        <div className="mt-6 grid grid-cols-5 gap-4">
-          {EMOTIONS.map((emotion) => (
-            <div
-              key={emotion.value}
-              className="flex flex-col items-center text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
-            >
-              <span className="text-2xl">{emotion.value}</span>
-              <span className="text-sm text-muted-foreground mt-2">
-                {emotion.label}
-              </span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

@@ -146,26 +146,44 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
-      <AuthButton />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="container max-w-4xl mx-auto pt-16 px-4 relative"
       >
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 text-purple-900 dark:text-purple-100">
-          Dream Interpreter
-        </h1>
-        <p className="text-center mb-12 text-gray-600 dark:text-gray-300">
-          Share your dream and receive a deep, meaningful interpretation
-        </p>
+        <div className="text-center mb-12">
+          <img
+            src="/lovable-uploads/7cd8c0a1-292b-4b49-a5bd-9a6478c5d82e.png"
+            alt="Dream Baba"
+            className="w-32 h-32 mx-auto mb-8"
+          />
+          <h1 className="text-4xl md:text-5xl font-bold text-purple-900 dark:text-purple-100">
+            Dream Interpreter
+          </h1>
+          <p className="text-center mt-4 text-gray-600 dark:text-gray-300">
+            Share your dream and receive a deep, meaningful interpretation
+          </p>
+        </div>
         
-        <DreamForm onSubmit={analyzeDream} isLoading={isLoading || isBackgroundSaving} />
-        
-        {isLoading && <LoadingDream />}
-        
-        {currentDream && !isLoading && (
-          <DreamInterpretation dream={currentDream} />
-        )}
+        <div className="transition-all duration-300">
+          {!isLoading && !currentDream && (
+            <DreamForm onSubmit={analyzeDream} isLoading={isLoading || isBackgroundSaving} />
+          )}
+          
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-8"
+            >
+              <LoadingDream />
+            </motion.div>
+          )}
+          
+          {currentDream && !isLoading && (
+            <DreamInterpretation dream={currentDream} />
+          )}
+        </div>
         
         {showSignUpWall && (
           <SignUpWall onComplete={handleSignUpComplete} />
