@@ -1,147 +1,105 @@
-import { useState } from "react";
-import { format, subMonths, subWeeks, subYears } from "date-fns";
+import { useMemo } from "react";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const EMOTIONS_MAP = {
-  "😊": 100, // Happy
-  "😌": 75,  // Calm
-  "😕": 50,  // Confused
-  "😨": 25,  // Anxious
-  "😢": 5,   // Sad
-};
-
-const REVERSE_EMOTIONS_MAP = {
-  100: "😊",
-  75: "😌",
-  50: "😕",
-  25: "😨",
-  5: "😢",
-};
+const EMOTIONS = [
+  { emoji: "😢", label: "Sad" },
+  { emoji: "😨", label: "Anxious" },
+  { emoji: "😕", label: "Confused" },
+  { emoji: "😌", label: "Calm" },
+  { emoji: "😊", label: "Happy" },
+];
 
 interface EmotionalTrajectoryReportProps {
   dreams: Array<{
-    date: string;
     emotion_before?: string;
     emotion_after?: string;
   }>;
 }
 
 const EmotionalTrajectoryReport = ({ dreams }: EmotionalTrajectoryReportProps) => {
-  const [timeRange, setTimeRange] = useState("week");
+  const emotionCounts = useMemo(() => {
+    const before: { [key: string]: number } = {};
+    const after: { [key: string]: number } = {};
+    
+    EMOTIONS.forEach(({ emoji }) => {
+      before[emoji] = 0;
+      after[emoji] = 0;
+    });
 
-  const getDateLimit = () => {
-    const now = new Date();
-    switch (timeRange) {
-      case "week":
-        return subWeeks(now, 1);
-      case "month":
-        return subMonths(now, 1);
-      case "6months":
-        return subMonths(now, 6);
-      case "year":
-        return subYears(now, 1);
-      default:
-        return subWeeks(now, 1);
-    }
-  };
+    dreams.forEach((dream) => {
+      if (dream.emotion_before) before[dream.emotion_before]++;
+      if (dream.emotion_after) after[dream.emotion_after]++;
+    });
 
-  const filteredDreams = dreams.filter(
-    (dream) => new Date(dream.date) >= getDateLimit()
-  );
+    return { before, after };
+  }, [dreams]);
 
-  const chartData = filteredDreams.map((dream) => ({
-    date: format(new Date(dream.date), "MMM dd"),
-    before: dream.emotion_before ? EMOTIONS_MAP[dream.emotion_before as keyof typeof EMOTIONS_MAP] : null,
-    after: dream.emotion_after ? EMOTIONS_MAP[dream.emotion_after as keyof typeof EMOTIONS_MAP] : null,
-  }));
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border">
-          <p className="font-semibold">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-sm">
-              {entry.name === "before" ? "Before: " : "After: "}
-              {REVERSE_EMOTIONS_MAP[entry.value as keyof typeof REVERSE_EMOTIONS_MAP]}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+  const chartData = useMemo(() => {
+    return EMOTIONS.map(({ emoji, label }) => ({
+      emoji,
+      label,
+      before: emotionCounts.before[emoji] || 0,
+      after: emotionCounts.after[emoji] || 0,
+    }));
+  }, [emotionCounts]);
 
   return (
-    <Card className="w-full mt-8">
+    <Card>
       <CardHeader>
-        <CardTitle>Emotional Trajectory</CardTitle>
+        <CardTitle>Emotional Journey</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs value={timeRange} onValueChange={setTimeRange}>
-          <TabsList className="grid w-full grid-cols-4 mb-4">
-            <TabsTrigger value="week">Week</TabsTrigger>
-            <TabsTrigger value="month">Month</TabsTrigger>
-            <TabsTrigger value="6months">6 Months</TabsTrigger>
-            <TabsTrigger value="year">Year</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        
-        <div className="h-[400px] mt-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis
-                domain={[0, 100]}
-                ticks={[5, 25, 50, 75, 100]}
-                tickFormatter={(value) => REVERSE_EMOTIONS_MAP[value as keyof typeof REVERSE_EMOTIONS_MAP]}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Line
-                type="monotone"
-                dataKey="before"
-                stroke="#9333ea"
-                name="Before"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="after"
-                stroke="#22c55e"
-                name="After"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="mt-4 grid grid-cols-5 gap-4">
-          {[
-            { emoji: "😢", label: "Sad" },
-            { emoji: "😨", label: "Anxious" },
-            { emoji: "😕", label: "Confused" },
-            { emoji: "😌", label: "Calm" },
-            { emoji: "😊", label: "Happy" },
-          ].map(({ emoji, label }) => (
-            <div key={emoji} className="text-center">
-              <span className="text-4xl">{emoji}</span>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                {label}
-              </p>
+        <div className="space-y-8">
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Initial Feelings</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="emoji"
+                    tick={{ fontSize: 20 }}
+                  />
+                  <YAxis />
+                  <Bar dataKey="before" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-          ))}
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4">After Interpretation</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="emoji"
+                    tick={{ fontSize: 20 }}
+                  />
+                  <YAxis />
+                  <Bar dataKey="after" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-8 pt-4">
+            {EMOTIONS.map(({ emoji, label }) => (
+              <div key={emoji} className="text-center">
+                <span className="text-2xl">{emoji}</span>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
