@@ -33,11 +33,22 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
       }
       onComplete();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
+      // Check if the error is a user_already_exists error
+      const errorBody = error instanceof Error ? error.message : "An error occurred";
+      if (typeof errorBody === 'string' && errorBody.includes('user_already_exists')) {
+        toast({
+          title: "Account Exists",
+          description: "This email is already registered. Please sign in instead.",
+          variant: "destructive",
+        });
+        setIsSignUp(false); // Switch to sign in mode
+      } else {
+        toast({
+          title: "Error",
+          description: errorBody,
+          variant: "destructive",
+        });
+      }
     }
   };
 
