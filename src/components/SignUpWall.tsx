@@ -60,8 +60,8 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-auto my-8">
         <h2 className="text-2xl font-bold mb-6 text-center">
           {isSignUp ? "Join us to explore your dreams" : "Welcome back"}
         </h2>

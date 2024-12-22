@@ -6,11 +6,15 @@ import LoadingDream from "@/components/LoadingDream";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { PenSquare } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Index = () => {
   const [dreamData, setDreamData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showSignUpWall, setShowSignUpWall] = useState(false);
+  const [showDreamForm, setShowDreamForm] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -21,6 +25,8 @@ const Index = () => {
     }
 
     setIsLoading(true);
+    setShowDreamForm(false);
+
     try {
       const { data, error } = await supabase.functions.invoke('interpret-dream', {
         body: { dream, emotionBefore, userName: user?.email },
@@ -43,7 +49,6 @@ const Index = () => {
 
       setDreamData(newDream);
 
-      // Save to database
       const { error: dbError } = await supabase
         .from('dreams')
         .insert([{
@@ -67,6 +72,7 @@ const Index = () => {
         description: "Failed to interpret your dream. Please try again.",
         variant: "destructive",
       });
+      setShowDreamForm(true);
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +84,11 @@ const Index = () => {
       title: "Welcome!",
       description: "You can now start interpreting your dreams.",
     });
+  };
+
+  const handleNewDream = () => {
+    setDreamData(null);
+    setShowDreamForm(true);
   };
 
   return (
@@ -97,17 +108,50 @@ const Index = () => {
           </p>
         </div>
 
-        <DreamForm onSubmit={handleDreamSubmit} isLoading={isLoading} />
+        <AnimatePresence mode="wait">
+          {showDreamForm && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <DreamForm onSubmit={handleDreamSubmit} isLoading={isLoading} />
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {showSignUpWall && (
           <SignUpWall onComplete={handleSignUpComplete} />
         )}
         
-        {isLoading ? (
-          <LoadingDream />
-        ) : (
-          dreamData && <DreamInterpretation dream={dreamData} />
-        )}
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <LoadingDream />
+            </motion.div>
+          ) : dreamData && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <DreamInterpretation dream={dreamData} />
+              <div className="flex justify-center mt-8">
+                <Button
+                  onClick={handleNewDream}
+                  className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
+                >
+                  <PenSquare className="w-4 h-4" />
+                  Interpret Another Dream
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
