@@ -23,7 +23,7 @@ const Journal = () => {
     try {
       const { data, error } = await supabase
         .from("dreams")
-        .select("*")
+        .select("dream, interpretation, symbolism, emotional_analysis, detailed_interpretation, created_at")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -32,6 +32,9 @@ const Journal = () => {
         data.map((dream) => ({
           dream: dream.dream,
           interpretation: dream.interpretation,
+          symbolism: dream.symbolism,
+          emotional_analysis: dream.emotional_analysis,
+          detailed_interpretation: dream.detailed_interpretation,
           date: new Date(dream.created_at).toISOString(),
         }))
       );

@@ -12,23 +12,32 @@ export type Database = {
       dreams: {
         Row: {
           created_at: string
+          detailed_interpretation: string | null
           dream: string
+          emotional_analysis: string | null
           id: string
           interpretation: string
+          symbolism: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
+          detailed_interpretation?: string | null
           dream: string
+          emotional_analysis?: string | null
           id?: string
           interpretation: string
+          symbolism?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
+          detailed_interpretation?: string | null
           dream?: string
+          emotional_analysis?: string | null
           id?: string
           interpretation?: string
+          symbolism?: string | null
           user_id?: string | null
         }
         Relationships: []
