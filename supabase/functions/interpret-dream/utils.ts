@@ -28,42 +28,6 @@ export const getUserName = async (userId: string) => {
   }
 };
 
-export const generateTitle = async (openAIApiKey: string, dream: string, useI see the issue. The error occurs because in Edge Functions, we need to use the full URL for importing packages, including `@supabase/supabase-js`. Let's fix this by using the correct import URL.
-
-<lov-code>
-First, let's update the utils.ts file to use the correct import format:
-
-<lov-write file_path="supabase/functions/interpret-dream/utils.ts">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-export const getUserName = async (userId: string) => {
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', userId)
-      .single();
-
-    if (error) throw error;
-    
-    // Extract first name from full name
-    const firstName = data?.full_name?.split(' ')[0] || 'friend';
-    return firstName;
-  } catch (error) {
-    console.error('Error fetching user name:', error);
-    return 'friend'; // Fallback if we can't get the name
-  }
-};
-
 export const generateTitle = async (openAIApiKey: string, dream: string, useIslamicInterpretation: boolean) => {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
