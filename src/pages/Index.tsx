@@ -5,6 +5,7 @@ import DreamInterpretation from "@/components/DreamInterpretation";
 import LoadingDream from "@/components/LoadingDream";
 import DreamHistory from "@/components/DreamHistory";
 import { useToast } from "@/hooks/use-toast";
+import { Key } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -115,8 +116,17 @@ const Index = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="container max-w-4xl mx-auto pt-16 px-4"
+        className="container max-w-4xl mx-auto pt-16 px-4 relative"
       >
+        {/* API Key Button */}
+        <button
+          onClick={() => setShowApiKeyDialog(true)}
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          aria-label="Update API Key"
+        >
+          <Key className="w-6 h-6" />
+        </button>
+
         <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 text-purple-900 dark:text-purple-100">
           Dream Interpreter
         </h1>
