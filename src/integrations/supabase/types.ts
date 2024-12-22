@@ -96,18 +96,24 @@ export type Database = {
           full_name: string
           id: string
           is_admin: boolean | null
+          subscribed: boolean | null
+          subscription_plan: string | null
         }
         Insert: {
           created_at?: string
           full_name: string
           id: string
           is_admin?: boolean | null
+          subscribed?: boolean | null
+          subscription_plan?: string | null
         }
         Update: {
           created_at?: string
           full_name?: string
           id?: string
           is_admin?: boolean | null
+          subscribed?: boolean | null
+          subscription_plan?: string | null
         }
         Relationships: []
       }
