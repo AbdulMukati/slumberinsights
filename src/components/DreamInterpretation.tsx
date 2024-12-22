@@ -37,7 +37,8 @@ const DreamInterpretation = ({ dream }: DreamInterpretationProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const formatSection = (text: string) => {
+  const formatSection = (text: string | null) => {
+    if (!text) return null;
     return text.split('\n').map((line, index) => (
       <p key={index} className="mb-2">{line}</p>
     ));
