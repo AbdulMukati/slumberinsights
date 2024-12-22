@@ -37,36 +37,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     console.log("Attempting to sign in with:", email);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      console.error("Sign in error:", error.message);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error("Sign in error:", error.message);
+        throw error;
+      }
+
+      // Update session and user if sign in was successful
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.session.user);
+      }
+    } catch (error) {
+      console.error("Sign in error:", error);
       throw error;
     }
   };
 
   const signUp = async (email: string, password: string) => {
     console.log("Attempting to sign up with:", email);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) {
-      console.error("Sign up error:", error.message);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error("Sign up error:", error.message);
+        throw error;
+      }
+
+      // Update session and user if sign up was successful and auto-confirms
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.session.user);
+      }
+    } catch (error) {
+      console.error("Sign up error:", error);
       throw error;
     }
   };
 
   const signOut = async () => {
     console.log("Attempting to sign out");
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Sign out error:", error.message);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Sign out error:", error.message);
+        throw error;
+      }
+      setSession(null);
+      setUser(null);
+      console.log("Sign out successful");
+    } catch (error) {
+      console.error("Sign out error:", error);
       throw error;
     }
-    console.log("Sign out successful");
   };
 
   return (
