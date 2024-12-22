@@ -46,7 +46,7 @@ const Index = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "gpt-3.5-turbo",
+          model: "gpt-3.5-turbo-0125",
           messages: [
             {
               role: 'system',
@@ -67,7 +67,7 @@ const Index = () => {
         if (response.status === 429) {
           localStorage.removeItem('OPENAI_API_KEY');
           setShowApiKeyDialog(true);
-          throw new Error("Your OpenAI API key has exceeded its quota. Please update your API key or check your billing details.");
+          throw new Error("Your OpenAI API key has exceeded its quota or is invalid. Please enter a new API key to continue.");
         }
         
         throw new Error(errorData.error?.message || 'Failed to analyze dream');
@@ -90,9 +90,6 @@ const Index = () => {
         description: error instanceof Error ? error.message : "Failed to analyze your dream. Please try again.",
         variant: "destructive"
       });
-      if (error instanceof Error && error.message.includes('quota')) {
-        setShowApiKeyDialog(true);
-      }
     } finally {
       setIsLoading(false);
     }
@@ -143,10 +140,10 @@ const Index = () => {
           <AlertDialogContent>
             <form onSubmit={handleApiKeySubmit}>
               <AlertDialogHeader>
-                <AlertDialogTitle>Update OpenAI API Key</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Your current API key has exceeded its quota or is invalid. Please enter a new OpenAI API key to continue using the dream interpretation feature.
-                  You can get your API key from the OpenAI website.
+                <AlertDialogTitle>Enter OpenAI API Key</AlertDialogTitle>
+                <AlertDialogDescription className="space-y-4">
+                  <p>Please enter a valid OpenAI API key to use the dream interpretation feature.</p>
+                  <p>You can get your API key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 underline">OpenAI website</a>.</p>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="my-4">
