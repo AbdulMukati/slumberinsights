@@ -15,11 +15,11 @@ export default function UpgradeModal({ isOpen, onClose, reason }: UpgradeModalPr
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubscribe = async (priceId: string) => {
+  const handleSubscribe = async (priceId: string, plan: 'monthly' | 'yearly') => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId },
+        body: { priceId, plan },
       });
 
       if (error) throw error;
@@ -72,7 +72,7 @@ export default function UpgradeModal({ isOpen, onClose, reason }: UpgradeModalPr
             </ul>
             <Button 
               className="w-full" 
-              onClick={() => handleSubscribe('price_1QYmYbKILnKvelWHQ3cU5LWn')}
+              onClick={() => handleSubscribe('price_1QYmYbKILnKvelWHQ3cU5LWn', 'monthly')}
               disabled={isLoading}
             >
               {isLoading ? "Processing..." : "Subscribe Monthly"}
@@ -101,7 +101,7 @@ export default function UpgradeModal({ isOpen, onClose, reason }: UpgradeModalPr
             </ul>
             <Button 
               className="w-full bg-purple-600 hover:bg-purple-700" 
-              onClick={() => handleSubscribe('price_1QYma1KILnKvelWHaXHP36Gd')}
+              onClick={() => handleSubscribe('price_1QYma1KILnKvelWHaXHP36Gd', 'yearly')}
               disabled={isLoading}
             >
               {isLoading ? "Processing..." : "Subscribe Yearly"}

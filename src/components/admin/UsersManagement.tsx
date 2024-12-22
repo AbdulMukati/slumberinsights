@@ -10,6 +10,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Profile {
   id: string;
@@ -17,6 +24,7 @@ interface Profile {
   created_at: string;
   is_admin: boolean;
   subscribed: boolean;
+  subscription_plan: 'free' | 'monthly' | 'yearly' | null;
 }
 
 const UsersManagement = () => {
@@ -69,24 +77,27 @@ const UsersManagement = () => {
     }
   };
 
-  const toggleSubscriptionStatus = async (userId: string, currentStatus: boolean) => {
+  const updateSubscriptionPlan = async (userId: string, plan: string) => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ subscribed: !currentStatus })
+        .update({ 
+          subscription_plan: plan,
+          subscribed: plan !== 'free'
+        })
         .eq("id", userId);
 
       if (error) throw error;
       await fetchUsers();
       toast({
         title: "Success",
-        description: "Subscription status updated successfully",
+        description: "Subscription plan updated successfully",
       });
     } catch (error) {
-      console.error("Error updating subscription status:", error);
+      console.error("Error updating subscription plan:", error);
       toast({
         title: "Error",
-        description: "Failed to update subscription status",
+        description: "Failed to update subscription plan",
         variant: "destructive",
       });
     }
@@ -101,8 +112,8 @@ const UsersManagement = () => {
             <TableHead>Name</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead>Admin Status</TableHead>
-            <TableHead>Subscription Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Subscription Plan</TableHead>
+            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -120,17 +131,27 @@ const UsersManagement = () => {
                 />
               </TableCell>
               <TableCell>
-                <Switch
-                  checked={user.subscribed}
-                  onCheckedChange={() => toggleSubscriptionStatus(user.id, user.subscribed)}
-                />
+                <Select
+                  value={user.subscription_plan || 'free'}
+                  onValueChange={(value) => updateSubscriptionPlan(user.id, value)}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell className="space-x-2">
                 <span className={user.is_admin ? "text-green-600" : "text-gray-600"}>
                   {user.is_admin ? "Admin" : "User"}
                 </span>
-                <span className={user.subscribed ? "text-purple-600" : "text-gray-600"}>
-                  {user.subscribed ? "Pro" : "Free"}
+                <span className={user.subscription_plan !== 'free' ? "text-purple-600" : "text-gray-600"}>
+                  {user.subscription_plan === 'yearly' ? "Yearly Pro" : 
+                   user.subscription_plan === 'monthly' ? "Monthly Pro" : "Free"}
                 </span>
               </TableCell>
             </TableRow>
