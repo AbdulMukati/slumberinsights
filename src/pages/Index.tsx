@@ -7,7 +7,7 @@ import DreamHistory from "@/components/DreamHistory";
 import { useToast } from "@/hooks/use-toast";
 import SignUpWall from "@/components/SignUpWall";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DreamEntry {
   dream: string;
