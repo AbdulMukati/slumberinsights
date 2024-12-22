@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import DreamForm from "@/components/DreamForm";
 import DreamInterpretation from "@/components/DreamInterpretation";
 import LoadingDream from "@/components/LoadingDream";
@@ -9,8 +8,6 @@ import SignUpWall from "@/components/SignUpWall";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import AuthButton from "@/components/AuthButton";
-import { Button } from "@/components/ui/button";
-import { CalendarDays } from "lucide-react";
 
 interface DreamEntry {
   dream: string;
@@ -25,7 +22,6 @@ const Index = () => {
   const [pendingDream, setPendingDream] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const analyzeDream = async (dreamText: string) => {
     if (!user) {
@@ -81,19 +77,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
-      <div className="absolute top-4 right-4 flex items-center gap-4">
-        {user && (
-          <Button
-            onClick={() => navigate("/journal")}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <CalendarDays className="w-4 h-4" />
-            Dream Journal
-          </Button>
-        )}
-        <AuthButton />
-      </div>
+      <AuthButton />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
