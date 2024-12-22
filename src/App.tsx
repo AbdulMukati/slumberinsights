@@ -41,13 +41,24 @@ const Navigation = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("is_admin")
-          .eq("id", user.id)
-          .single();
-        
-        setIsAdmin(profile?.is_admin || false);
+        try {
+          console.log("Checking admin status for user:", user.id);
+          const { data: profile, error } = await supabase
+            .from("profiles")
+            .select("is_admin")
+            .eq("id", user.id)
+            .single();
+          
+          if (error) {
+            console.error("Error fetching admin status:", error);
+            return;
+          }
+          
+          console.log("Profile data:", profile);
+          setIsAdmin(profile?.is_admin || false);
+        } catch (error) {
+          console.error("Error in checkAdminStatus:", error);
+        }
       }
     };
 
