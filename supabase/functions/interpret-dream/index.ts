@@ -16,7 +16,7 @@ serve(async (req) => {
   try {
     const { dream, emotionBefore, userId, useIslamicInterpretation } = await req.json();
     
-    console.log('Processing dream interpretation request:', { useIslamicInterpretation });
+    console.log('Processing dream interpretation request:', { useIslamicInterpretation, dreamLength: dream?.length });
 
     // Generate title first
     console.log('Generating title...');
@@ -41,6 +41,8 @@ serve(async (req) => {
     });
 
     const titleData = await titleResponse.json();
+    console.log('Title response:', titleData);
+
     if (!titleData.choices?.[0]?.message?.content) {
       console.error('Invalid title response:', titleData);
       throw new Error('Failed to generate title');
@@ -63,7 +65,7 @@ serve(async (req) => {
       4) **Detailed Islamic Symbolism**: Analyze each major symbol in the dream according to classical Islamic dream interpretation books like Ibn Sirin's work. Explain the various possible meanings in Islamic context (at least 100 words).
       
       5) **Spiritual Guidance**: Provide specific spiritual advice based on the dream's interpretation, including recommended duas, dhikr, or actions the dreamer might take (at least 100 words).
-
+      
       6) **Contemporary Perspective**: Add a section providing a modern psychological or general interpretation perspective, clearly labeled as "Non-Islamic Interpretation Perspective" to differentiate it from the Islamic analysis (at least 100 words).
       
       Use phrases like "In the light of Islamic teachings...", "The scholars of dream interpretation mention...", and maintain a supportive, encouraging tone while staying true to Islamic principles.
@@ -94,7 +96,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -111,7 +113,7 @@ serve(async (req) => {
     });
 
     const interpretationData = await interpretationResponse.json();
-    console.log('Received interpretation response:', interpretationData);
+    console.log('Interpretation response:', interpretationData);
 
     if (!interpretationData.choices?.[0]?.message?.content) {
       console.error('Invalid interpretation response:', interpretationData);
@@ -142,6 +144,8 @@ serve(async (req) => {
     });
 
     const imageData = await imageResponse.json();
+    console.log('Image response:', imageData);
+
     if (!imageData.data?.[0]?.url) {
       console.error('Invalid image response:', imageData);
       throw new Error('Failed to generate image');
@@ -176,12 +180,13 @@ serve(async (req) => {
       };
     }
 
-    console.log('Sending response with sections:', sections);
+    console.log('Final sections:', sections);
     return new Response(
       JSON.stringify({
         title,
         ...sections,
-        image_url: imageUrl
+        image_url: imageUrl,
+        raw_response: interpretationData // Adding raw response for debugging
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
