@@ -33,16 +33,19 @@ const Profile = () => {
           .from("profiles")
           .select("full_name")
           .eq("id", user.id)
-          .limit(1)
           .single();
 
         if (error) {
           console.error("Profile fetch error:", error);
-          // If profile doesn't exist, create it
           if (error.code === 'PGRST116') {
+            // Profile doesn't exist, create it
+            console.log("Creating new profile for user:", user.id);
             const { error: insertError } = await supabase
               .from("profiles")
-              .insert({ id: user.id, full_name: user.email?.split('@')[0] || 'User' });
+              .insert([{ 
+                id: user.id, 
+                full_name: user.email?.split('@')[0] || 'User'
+              }]);
             
             if (insertError) {
               console.error("Profile creation error:", insertError);
