@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
-import { LogIn, LogOut, User, CalendarDays, Menu, Settings } from 'lucide-react';
+import { LogIn, LogOut, CalendarDays, Menu, Settings } from 'lucide-react';
 import SignUpWall from './SignUpWall';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -28,11 +28,15 @@ const AuthButton = () => {
     }
   };
 
-  const handleJournalClick = () => {
+  const handleJournalClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     navigate('/journal');
   };
 
-  const handleProfileClick = () => {
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     navigate('/profile');
   };
 
@@ -117,7 +121,7 @@ const AuthButton = () => {
 
   return (
     <>
-      <div className="fixed top-4 right-4">
+      <div className="fixed top-4 right-4 z-50">
         <DesktopButtons />
         <MobileMenu />
       </div>

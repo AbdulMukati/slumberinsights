@@ -39,9 +39,20 @@ const DreamInterpretation = ({ dream }: DreamInterpretationProps) => {
 
   const formatSection = (text: string | null) => {
     if (!text) return null;
-    return text.split('\n').map((line, index) => (
-      <p key={index} className="mb-2">{line}</p>
-    ));
+    
+    // Split by double asterisks to handle section titles
+    const parts = text.split(/\*\*(.*?)\*\*/);
+    return parts.map((part, index) => {
+      if (index % 2 === 1) {
+        // This is a section title (was between **)
+        return <h4 key={index} className="font-semibold text-lg mt-4 mb-2">{part}</h4>;
+      } else {
+        // This is regular content
+        return part.split('\n').map((line, lineIndex) => (
+          <p key={`${index}-${lineIndex}`} className="mb-2">{line}</p>
+        ));
+      }
+    });
   };
 
   const handleSaveNotes = async () => {

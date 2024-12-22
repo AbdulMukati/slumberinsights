@@ -3,12 +3,16 @@ import { useState, useEffect } from "react";
 
 const LoadingDream = () => {
   const loadingMessages = [
-    "Let me ponder your dream for a moment",
-    "Hmm... flying elephants? How intriguing!",
-    "Analyzing the deeper meaning",
-    "Connecting the dream dots",
-    "Diving into your subconscious",
-    "Decoding the dream symbols"
+    "Let me ponder your dream for a moment...",
+    "Hmm... flying elephants wearing tutus? Fascinating!",
+    "Oh my, did that penguin just speak French?",
+    "Chasing chocolate clouds, were we?",
+    "Dancing with moonlit dragons, how poetic!",
+    "A talking cactus? Now that's interesting!",
+    "Time-traveling teacups? Tell me more...",
+    "Analyzing those rainbow-colored memories",
+    "Decoding your subconscious symphony",
+    "Connecting the cosmic dream dots"
   ];
   
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
