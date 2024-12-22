@@ -17,6 +17,7 @@ serve(async (req) => {
     const { dream, emotionBefore, userId, useIslamicInterpretation } = await req.json();
     
     // Generate title first
+    console.log('Generating title...');
     const titleResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -38,9 +39,14 @@ serve(async (req) => {
     });
 
     const titleData = await titleResponse.json();
+    if (!titleData.choices || !titleData.choices[0]) {
+      console.error('Invalid title response:', titleData);
+      throw new Error('Failed to generate title');
+    }
     const title = titleData.choices[0].message.content.replace(/"/g, '');
 
     // Generate interpretation
+    console.log('Generating interpretation...');
     const systemPrompt = useIslamicInterpretation
       ? `You are Dream Baba, a wise and deeply knowledgeable Islamic dream interpreter with extensive knowledge of the Quran, Hadith, and Islamic dream interpretation traditions. Your interpretations MUST be at least 300 words long and MUST be comprehensive and detailed, incorporating multiple references from Islamic sources.
 
@@ -96,9 +102,14 @@ serve(async (req) => {
     });
 
     const interpretationData = await interpretationResponse.json();
+    if (!interpretationData.choices || !interpretationData.choices[0]) {
+      console.error('Invalid interpretation response:', interpretationData);
+      throw new Error('Failed to generate interpretation');
+    }
     const interpretation = interpretationData.choices[0].message.content;
 
     // Generate image
+    console.log('Generating image...');
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -119,9 +130,14 @@ serve(async (req) => {
     });
 
     const imageData = await imageResponse.json();
+    if (!imageData.data || !imageData.data[0]) {
+      console.error('Invalid image response:', imageData);
+      throw new Error('Failed to generate image');
+    }
     const imageUrl = imageData.data[0].url;
 
     // Parse the sections
+    console.log('Parsing sections...');
     let sections;
     if (useIslamicInterpretation) {
       const parts = interpretation.split(/\d\)/).filter(Boolean);
@@ -141,6 +157,7 @@ serve(async (req) => {
       };
     }
 
+    console.log('Sending response...');
     return new Response(
       JSON.stringify({
         title,
@@ -150,10 +167,16 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in interpret-dream function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      JSON.stringify({ 
+        error: error.message,
+        details: 'An unexpected error occurred while interpreting your dream'
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
+      }
     );
   }
 });
