@@ -14,10 +14,13 @@ export type Database = {
           created_at: string
           detailed_interpretation: string | null
           dream: string
+          emotion_after: string | null
+          emotion_before: string | null
           emotional_analysis: string | null
           id: string
           image_url: string | null
           interpretation: string
+          notes: string | null
           symbolism: string | null
           title: string | null
           user_id: string | null
@@ -26,10 +29,13 @@ export type Database = {
           created_at?: string
           detailed_interpretation?: string | null
           dream: string
+          emotion_after?: string | null
+          emotion_before?: string | null
           emotional_analysis?: string | null
           id?: string
           image_url?: string | null
           interpretation: string
+          notes?: string | null
           symbolism?: string | null
           title?: string | null
           user_id?: string | null
@@ -38,10 +44,13 @@ export type Database = {
           created_at?: string
           detailed_interpretation?: string | null
           dream?: string
+          emotion_after?: string | null
+          emotion_before?: string | null
           emotional_analysis?: string | null
           id?: string
           image_url?: string | null
           interpretation?: string
+          notes?: string | null
           symbolism?: string | null
           title?: string | null
           user_id?: string | null

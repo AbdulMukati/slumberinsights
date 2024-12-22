@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AuthButton from "@/components/AuthButton";
 
 interface DreamEntry {
+  id: string;
   dream: string;
   interpretation: string;
   symbolism: string;
@@ -18,19 +19,20 @@ interface DreamEntry {
   date: string;
   title: string;
   image_url?: string;
+  emotion_before?: string;
 }
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentDream, setCurrentDream] = useState<DreamEntry | null>(null);
   const [showSignUpWall, setShowSignUpWall] = useState(false);
-  const [pendingDream, setPendingDream] = useState<string | null>(null);
+  const [pendingDream, setPendingDream] = useState<{text: string, emotion: string} | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const analyzeDream = async (dreamText: string) => {
+  const analyzeDream = async (dreamText: string, emotionBefore: string) => {
     if (!user) {
-      setPendingDream(dreamText);
+      setPendingDream({ text: dreamText, emotion: emotionBefore });
       setShowSignUpWall(true);
       return;
     }
@@ -43,18 +45,7 @@ const Index = () => {
 
       if (error) throw error;
 
-      const newDream: DreamEntry = {
-        dream: dreamText,
-        interpretation: data.interpretation,
-        symbolism: data.symbolism,
-        emotional_analysis: data.emotional_analysis,
-        detailed_interpretation: data.detailed_interpretation,
-        title: data.title,
-        image_url: data.image_url,
-        date: new Date().toISOString()
-      };
-      
-      const { error: saveError } = await supabase
+      const { data: savedDream, error: saveError } = await supabase
         .from('dreams')
         .insert([{
           user_id: user.id,
@@ -65,12 +56,15 @@ const Index = () => {
           detailed_interpretation: data.detailed_interpretation,
           title: data.title,
           image_url: data.image_url,
+          emotion_before: emotionBefore,
           created_at: new Date().toISOString()
-        }]);
+        }])
+        .select()
+        .single();
 
       if (saveError) throw saveError;
       
-      setCurrentDream(newDream);
+      setCurrentDream(savedDream as DreamEntry);
       toast({
         title: "Success",
         description: "Your dream has been interpreted and saved to your journal.",
@@ -89,7 +83,7 @@ const Index = () => {
   const handleSignUpComplete = async () => {
     setShowSignUpWall(false);
     if (pendingDream) {
-      await analyzeDream(pendingDream);
+      await analyzeDream(pendingDream.text, pendingDream.emotion);
       setPendingDream(null);
     }
   };
