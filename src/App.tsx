@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Journal from "./pages/Journal";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

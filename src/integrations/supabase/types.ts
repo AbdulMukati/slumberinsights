@@ -57,21 +57,51 @@ export type Database = {
         }
         Relationships: []
       }
+      openai_usage: {
+        Row: {
+          created_at: string
+          id: string
+          model_name: string
+          request_type: string
+          tokens_used: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          model_name: string
+          request_type: string
+          tokens_used: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          model_name?: string
+          request_type?: string
+          tokens_used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           full_name: string
           id: string
+          is_admin: boolean | null
         }
         Insert: {
           created_at?: string
           full_name: string
           id: string
+          is_admin?: boolean | null
         }
         Update: {
           created_at?: string
           full_name?: string
           id?: string
+          is_admin?: boolean | null
         }
         Relationships: []
       }

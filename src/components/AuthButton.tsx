@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
-import { LogIn, LogOut, CalendarDays, Menu, Settings } from 'lucide-react';
+import { LogIn, LogOut, CalendarDays, Menu, Settings, Shield } from 'lucide-react';
 import SignUpWall from './SignUpWall';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,24 @@ import {
 const AuthButton = () => {
   const { user, signOut } = useAuth();
   const [showSignUpWall, setShowSignUpWall] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+        
+        setIsAdmin(profile?.is_admin || false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   const handleAuthClick = async () => {
     if (user) {
@@ -40,6 +58,12 @@ const AuthButton = () => {
     navigate('/profile');
   };
 
+  const handleAdminClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate('/admin');
+  };
+
   // Desktop version (md and up)
   const DesktopButtons = () => (
     <div className="hidden md:flex items-center gap-4">
@@ -61,6 +85,16 @@ const AuthButton = () => {
             <Settings className="h-4 w-4" />
             Profile
           </Button>
+          {isAdmin && (
+            <Button
+              onClick={handleAdminClick}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Shield className="h-4 w-4" />
+              Admin
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -101,6 +135,12 @@ const AuthButton = () => {
               <Settings className="h-4 w-4 mr-2" />
               Profile
             </DropdownMenuItem>
+            {isAdmin && (
+              <DropdownMenuItem onClick={handleAdminClick}>
+                <Shield className="h-4 w-4 mr-2" />
+                Admin
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={handleAuthClick}>
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
