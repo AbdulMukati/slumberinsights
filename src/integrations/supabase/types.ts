@@ -111,12 +111,43 @@ export type Database = {
         }
         Relationships: []
       }
+      user_usage: {
+        Row: {
+          date: string | null
+          dream_interpretations_count: number | null
+          id: string
+          image_generations_count: number | null
+          user_id: string
+        }
+        Insert: {
+          date?: string | null
+          dream_interpretations_count?: number | null
+          id?: string
+          image_generations_count?: number | null
+          user_id: string
+        }
+        Update: {
+          date?: string | null
+          dream_interpretations_count?: number | null
+          id?: string
+          image_generations_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_usage: {
+        Args: {
+          p_user_id: string
+          p_dream_interpretations_increment?: number
+          p_image_generations_increment?: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
