@@ -64,7 +64,7 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
   };
 
   return (
-    <div className="space-y-6 border-t pt-6 px-6">
+    <div className="space-y-6 border-t pt-6 px-6 pb-8">
       <div className="text-center">
         <Label className="text-lg mb-4 block font-semibold">
           How do you feel after reading the interpretation?
@@ -89,7 +89,7 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
         </RadioGroup>
       </div>
 
-      <div className="px-6">
+      <div>
         <Label htmlFor="notes" className="text-lg mb-4 block font-semibold">
           Your Notes (Optional)
         </Label>

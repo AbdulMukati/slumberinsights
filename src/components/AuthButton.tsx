@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
-import { LogIn, LogOut, CalendarDays, Menu, Settings, Shield, LineChart } from 'lucide-react';
+import { LogOut, CalendarDays, Menu, Settings, Shield, LineChart } from 'lucide-react';
 import SignUpWall from './SignUpWall';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -46,69 +46,70 @@ const AuthButton = () => {
     }
   };
 
+  if (!user) {
+    return (
+      <>
+        <Button
+          variant="ghost"
+          onClick={handleAuthClick}
+          className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
+        >
+          Sign In
+        </Button>
+        {showSignUpWall && (
+          <SignUpWall onComplete={() => setShowSignUpWall(false)} />
+        )}
+      </>
+    );
+  }
+
   return (
     <>
       <div className="flex items-center gap-2">
-        {user ? (
-          <>
-            <div className="md:hidden">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => navigate('/journal')}>
-                    <CalendarDays className="h-4 w-4 mr-2" />
-                    Dream Journal
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/reports')}>
-                    <LineChart className="h-4 w-4 mr-2" />
-                    Reports
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Profile
-                  </DropdownMenuItem>
-                  {isAdmin && (
-                    <DropdownMenuItem onClick={() => navigate('/admin')}>
-                      <Shield className="h-4 w-4 mr-2" />
-                      Admin
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={handleAuthClick}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleAuthClick}
-                className="ml-2"
-              >
-                <LogOut className="h-5 w-5" />
+        <div className="md:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
               </Button>
-            </div>
-          </>
-        ) : (
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => navigate('/journal')}>
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Dream Journal
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/reports')}>
+                <LineChart className="h-4 w-4 mr-2" />
+                Reports
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <Settings className="h-4 w-4 mr-2" />
+                Profile
+              </DropdownMenuItem>
+              {isAdmin && (
+                <DropdownMenuItem onClick={() => navigate('/admin')}>
+                  <Shield className="h-4 w-4 mr-2" />
+                  Admin
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={handleAuthClick}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="hidden md:flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleAuthClick}
+            className="ml-2"
           >
-            <LogIn className="h-5 w-5" />
+            <LogOut className="h-5 w-5" />
           </Button>
-        )}
+        </div>
       </div>
-
-      {showSignUpWall && (
-        <SignUpWall onComplete={() => setShowSignUpWall(false)} />
-      )}
     </>
   );
 };

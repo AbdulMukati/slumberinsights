@@ -29,7 +29,7 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('interpret-dream', {
-        body: { dream, emotionBefore, userName: user?.email },
+        body: { dream, emotionBefore, userId: user.id },
       });
 
       if (error) throw error;

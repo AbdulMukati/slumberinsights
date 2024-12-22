@@ -1,7 +1,10 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,9 +17,20 @@ serve(async (req) => {
   }
 
   try {
-    const { dream, userName } = await req.json();
-    const firstName = userName?.split('@')[0]?.split('.')[0] || 'friend';
-    console.log('Received dream from:', firstName);
+    const { dream, emotionBefore, userId } = await req.json();
+    
+    // Initialize Supabase client
+    const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
+    
+    // Get user's profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', userId)
+      .single();
+
+    const firstName = profile?.full_name?.split(' ')[0] || 'friend';
+    console.log('Using name:', firstName);
 
     // Generate title
     const titleResponse = await fetch('https://api.openai.com/v1/chat/completions', {

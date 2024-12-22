@@ -18,9 +18,9 @@ const DreamContent = ({
   const formatText = (text: string) => {
     return text.split('**').map((part, index) => {
       return index % 2 === 0 ? (
-        <span key={index}>{part}</span>
+        <span key={index} className="whitespace-pre-wrap">{part}</span>
       ) : (
-        <strong key={index} className="font-bold">{part}</strong>
+        <strong key={index} className="font-bold text-purple-900 dark:text-purple-300">{part}</strong>
       );
     });
   };
@@ -54,7 +54,7 @@ const DreamContent = ({
           <h3 className="text-xl font-semibold mb-4 text-purple-900 dark:text-purple-100">
             Interpretation
           </h3>
-          <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+          <div className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
             {formatText(interpretation)}
           </div>
         </div>
