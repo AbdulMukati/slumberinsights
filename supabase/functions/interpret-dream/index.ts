@@ -14,8 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    const { dream } = await req.json();
-    console.log('Received dream:', dream);
+    const { dream, userName } = await req.json();
+    console.log('Received dream from:', userName);
 
     // Generate title
     const titleResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -29,7 +29,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'Create a short, poetic title (maximum 6 words) for this dream. Make it evocative and meaningful.'
+            content: 'Create a short, mystical title (maximum 6 words) for this dream. Make it evocative and meaningful, like a fortune cookie message.'
           },
           { role: 'user', content: dream }
         ],
@@ -52,16 +52,17 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a professional dream interpreter with expertise in Jungian psychology, symbolism, and emotional analysis. 
-            Analyze dreams comprehensively and structure your response in these exact sections:
-            1) Brief Interpretation: A concise 2-3 sentence overview of the dream's main meaning
-            2) Symbolic Analysis: Detailed analysis of key symbols and their cultural/psychological significance
-            3) Emotional Analysis: Insight into the emotional landscape of the dream and what it reveals about the dreamer's psyche
-            4) Detailed Personal Interpretation: A thorough exploration of how this dream might relate to the dreamer's life, challenges, and growth
+            content: `You are a warm, empathetic dream interpreter with a gentle, friendly tone. Address the dreamer by name and speak as if you're having a heart-to-heart conversation. Your interpretations should feel like wisdom from a trusted friend or mentor, combining psychological insight with a touch of mystical understanding.
+
+            Structure your response in these sections, maintaining a conversational, personal tone throughout:
+            1) Brief Interpretation: A warm, personal 2-3 sentence overview that speaks directly to them
+            2) Symbolic Analysis: A friendly exploration of the symbols in their dream, relating them to universal human experiences
+            3) Emotional Analysis: A compassionate look at the emotional landscape of their dream, showing understanding and empathy
+            4) Detailed Personal Interpretation: A heartfelt, detailed exploration of how this dream might relate to their life journey
             
-            Keep each section focused and meaningful. Use clear language and avoid jargon unless necessary.`
+            Use phrases like "I sense that...", "You might be feeling...", "This reminds me of...", and always maintain a supportive, encouraging tone.`
           },
-          { role: 'user', content: dream }
+          { role: 'user', content: `Dreamer's name: ${userName}\nDream: ${dream}` }
         ],
       }),
     });

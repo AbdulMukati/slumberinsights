@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SignUpWallProps {
   onComplete: () => void;
@@ -12,6 +13,7 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
   const [isSignUp, setIsSignUp] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
 
@@ -20,9 +22,16 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
     try {
       if (isSignUp) {
         await signUp(email, password);
+        // Create profile after successful signup
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{ id: (await supabase.auth.getUser()).data.user?.id, full_name: fullName }]);
+
+        if (profileError) throw profileError;
+
         toast({
-          title: "Success!",
-          description: "Account created successfully. You can now view your dream interpretation.",
+          title: "Welcome aboard!",
+          description: `Great to have you here, ${fullName}! You can now view your dream interpretation.`,
         });
       } else {
         await signIn(email, password);
@@ -33,7 +42,6 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
       }
       onComplete();
     } catch (error) {
-      // Check if the error is a user_already_exists error
       const errorBody = error instanceof Error ? error.message : "An error occurred";
       if (typeof errorBody === 'string' && errorBody.includes('user_already_exists')) {
         toast({
@@ -41,7 +49,7 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
           description: "This email is already registered. Please sign in instead.",
           variant: "destructive",
         });
-        setIsSignUp(false); // Switch to sign in mode
+        setIsSignUp(false);
       } else {
         toast({
           title: "Error",
@@ -56,9 +64,20 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
         <h2 className="text-2xl font-bold mb-6 text-center">
-          {isSignUp ? "Sign up to view your interpretation" : "Sign in"}
+          {isSignUp ? "Join us to explore your dreams" : "Welcome back"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isSignUp && (
+            <div>
+              <Input
+                type="text"
+                placeholder="Your name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required={isSignUp}
+              />
+            </div>
+          )}
           <div>
             <Input
               type="email"

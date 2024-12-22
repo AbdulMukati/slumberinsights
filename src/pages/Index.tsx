@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import DreamForm from "@/components/DreamForm";
 import DreamInterpretation from "@/components/DreamInterpretation";
@@ -27,8 +27,27 @@ const Index = () => {
   const [currentDream, setCurrentDream] = useState<DreamEntry | null>(null);
   const [showSignUpWall, setShowSignUpWall] = useState(false);
   const [pendingDream, setPendingDream] = useState<{text: string, emotion: string} | null>(null);
+  const [userName, setUserName] = useState<string>("");
   const { toast } = useToast();
   const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (data && !error) {
+          setUserName(data.full_name);
+        }
+      }
+    };
+
+    fetchUserName();
+  }, [user]);
 
   const analyzeDream = async (dreamText: string, emotionBefore: string) => {
     if (!user) {
@@ -40,7 +59,7 @@ const Index = () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('interpret-dream', {
-        body: { dream: dreamText }
+        body: { dream: dreamText, userName }
       });
 
       if (error) throw error;
@@ -66,7 +85,7 @@ const Index = () => {
       
       setCurrentDream(savedDream as DreamEntry);
       toast({
-        title: "Success",
+        title: "Dream Interpreted",
         description: "Your dream has been interpreted and saved to your journal.",
       });
     } catch (error) {
