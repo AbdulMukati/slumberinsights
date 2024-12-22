@@ -6,6 +6,8 @@ import LoadingDream from "@/components/LoadingDream";
 import DreamHistory from "@/components/DreamHistory";
 import { useToast } from "@/hooks/use-toast";
 import { Key } from "lucide-react";
+import SignUpWall from "@/components/SignUpWall";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/lib/supabase";
 
 interface DreamEntry {
   dream: string;
@@ -27,61 +30,45 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentDream, setCurrentDream] = useState<DreamEntry | null>(null);
   const [history, setHistory] = useState<DreamEntry[]>([]);
-  const [showApiKeyDialog, setShowApiKeyDialog] = useState(!localStorage.getItem('OPENAI_API_KEY'));
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
+  const [showSignUpWall, setShowSignUpWall] = useState(false);
+  const [pendingDream, setPendingDream] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const analyzeDream = async (dreamText: string) => {
-    const apiKey = localStorage.getItem('OPENAI_API_KEY');
-    
-    if (!apiKey) {
-      setShowApiKeyDialog(true);
+    if (!user) {
+      setPendingDream(dreamText);
+      setShowSignUpWall(true);
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo-0125",
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a wise dream interpreter. Analyze dreams by considering symbolism, emotions, and potential meanings. Be insightful but concise. Structure your response in clear sections: Symbols, Emotions, and Meaning.'
-            },
-            {
-              role: 'user',
-              content: dreamText
-            }
-          ],
-          temperature: 0.7,
-        }),
+      // Call your backend endpoint that handles the OpenAI API call
+      const { data, error } = await supabase.functions.invoke('interpret-dream', {
+        body: { dream: dreamText }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        
-        if (response.status === 429) {
-          localStorage.removeItem('OPENAI_API_KEY');
-          setShowApiKeyDialog(true);
-          throw new Error("Your OpenAI API key has exceeded its quota or is invalid. Please enter a new API key to continue.");
-        }
-        
-        throw new Error(errorData.error?.message || 'Failed to analyze dream');
-      }
-      
-      const data = await response.json();
-      const interpretation = data.choices[0].message.content;
-      
+      if (error) throw error;
+
       const newDream: DreamEntry = {
         dream: dreamText,
-        interpretation,
+        interpretation: data.interpretation,
         date: new Date().toLocaleDateString()
       };
+      
+      // Save dream to Supabase
+      const { error: saveError } = await supabase
+        .from('dreams')
+        .insert([{
+          user_id: user.id,
+          dream: dreamText,
+          interpretation: data.interpretation,
+          created_at: new Date().toISOString()
+        }]);
+
+      if (saveError) throw saveError;
       
       setCurrentDream(newDream);
       setHistory(prev => [newDream, ...prev].slice(0, 5));
@@ -96,18 +83,11 @@ const Index = () => {
     }
   };
 
-  const handleApiKeySubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const apiKey = formData.get('apiKey') as string;
-    
-    if (apiKey) {
-      localStorage.setItem('OPENAI_API_KEY', apiKey);
-      setShowApiKeyDialog(false);
-      toast({
-        title: "Success",
-        description: "API key has been updated successfully.",
-      });
+  const handleSignUpComplete = async () => {
+    setShowSignUpWall(false);
+    if (pendingDream) {
+      await analyzeDream(pendingDream);
+      setPendingDream(null);
     }
   };
 
@@ -144,6 +124,10 @@ const Index = () => {
         
         {history.length > 0 && !isLoading && (
           <DreamHistory dreams={history} />
+        )}
+
+        {showSignUpWall && (
+          <SignUpWall onComplete={handleSignUpComplete} />
         )}
 
         <AlertDialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
