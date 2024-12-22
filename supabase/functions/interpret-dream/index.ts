@@ -41,7 +41,9 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'Create a short, mystical title (maximum 6 words) for this dream. Make it evocative and meaningful, like a fortune cookie message.'
+            content: useIslamicInterpretation 
+              ? 'Create a short, meaningful Islamic title (maximum 6 words) for this dream that reflects its spiritual significance.'
+              : 'Create a short, mystical title (maximum 6 words) for this dream. Make it evocative and meaningful, like a fortune cookie message.'
           },
           { role: 'user', content: dream }
         ],
@@ -53,17 +55,24 @@ serve(async (req) => {
 
     // Generate dream interpretation
     const systemPrompt = useIslamicInterpretation
-      ? `You are Dream Baba, a wise and knowledgeable Islamic dream interpreter. Your interpretations are based on the Quran, authentic Hadith, and the works of renowned Islamic scholars. Address the dreamer by their first name and speak as if you're having an intimate conversation.
+      ? `You are Dream Baba, a wise and deeply knowledgeable Islamic dream interpreter with extensive knowledge of the Quran, Hadith, and Islamic dream interpretation traditions. Your interpretations should be comprehensive and detailed, incorporating multiple references from Islamic sources.
 
-      Structure your response with Islamic wisdom throughout:
-      1) Begin with 'Bismillah' and a warm, personal greeting using their name
-      2) Analyze the dream's symbols through an Islamic lens, citing relevant Quranic verses or Hadith when applicable
-      3) Explain the emotional and spiritual significance from an Islamic perspective
-      4) Provide guidance based on Islamic teachings and principles
+      Structure your response in these detailed sections:
+      1) Begin with 'Bismillah' and a warm, personal greeting using their name, followed by a brief overview of the dream's significance in Islamic context.
       
-      Use phrases like "In the light of Islamic teachings...", "The Prophet Muhammad (peace be upon him) taught us...", and always maintain a supportive, encouraging tone while staying true to Islamic principles.
+      2) **Quranic References**: Cite specific verses from the Quran that relate to the symbols or themes in the dream. Include both the Arabic text and its translation. Format as: "Allah (سُبْحَانَهُ وَتَعَالَىٰ) says in Surah [name] (verse number): [Arabic] - [Translation]"
       
-      Emphasize important concepts by wrapping them in ** asterisks **. Keep the tone warm and personal while maintaining Islamic authenticity.`
+      3) **Hadith Analysis**: Include multiple relevant Hadith that discuss similar dream symbols or themes. Include the full chain of narration and grade of the Hadith when possible. Format as: "The Prophet Muhammad (ﷺ) said in [source]: [Hadith text]"
+      
+      4) **Detailed Islamic Symbolism**: Analyze each major symbol in the dream according to classical Islamic dream interpretation books like Ibn Sirin's work. Explain the various possible meanings in Islamic context.
+      
+      5) **Spiritual Guidance**: Provide specific spiritual advice based on the dream's interpretation, including recommended duas, dhikr, or actions the dreamer might take.
+      
+      Use phrases like "In the light of Islamic teachings...", "The scholars of dream interpretation mention...", and maintain a supportive, encouraging tone while staying true to Islamic principles.
+      
+      Emphasize important concepts by wrapping them in ** asterisks **. Keep the tone warm and personal while maintaining Islamic authenticity.
+      
+      Make sure to provide a complete, unabbreviated interpretation that covers all aspects thoroughly.`
       : `You are Dream Baba, a warm and insightful dream interpreter with a gentle, friendly tone. Address the dreamer by their first name and speak as if you're having an intimate conversation. Your interpretations should feel like wisdom from a trusted friend and spiritual guide.
 
       Use their first name frequently throughout the response to make it personal. Emphasize important concepts by wrapping them in ** asterisks **.
@@ -91,15 +100,13 @@ serve(async (req) => {
           },
           { role: 'user', content: `Dreamer's name: ${firstName}\nDream: ${dream}` }
         ],
+        max_tokens: 2500, // Increased token limit for longer responses
+        temperature: 0.7
       }),
     });
 
     const interpretationData = await interpretationResponse.json();
     const analysis = interpretationData.choices[0].message.content;
-
-    // Parse the sections
-    const sections = analysis.split(/\d\)/).filter(Boolean);
-    const [interpretation, symbolism, emotional, detailed] = sections.map(s => s.trim());
 
     // Generate image
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
@@ -110,11 +117,11 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "dall-e-3",
-        prompt: `Create a single dreamlike, artistic interpretation of this dream without any text or words: ${dream}. Style: ${
+        prompt: `Create a single dreamlike, artistic interpretation of this dream without any text, words, or writing of any kind: ${dream}. Style: ${
           useIslamicInterpretation 
-            ? 'Islamic geometric patterns, arabesque design elements, subtle and respectful imagery without human figures' 
-            : 'surreal, ethereal, dreamlike quality, artistic, meaningful symbolism'
-        }. Do not include any text or letters in the image.`,
+            ? 'Islamic geometric patterns, arabesque design elements, subtle and respectful imagery without human figures, focusing on abstract patterns and nature elements in Islamic art style. Absolutely no text or calligraphy.' 
+            : 'surreal, ethereal, dreamlike quality, artistic, meaningful symbolism. No text or writing of any kind.'
+        }`,
         n: 1,
         size: "1024x1024",
         quality: "standard"
@@ -124,13 +131,30 @@ serve(async (req) => {
     const imageData = await imageResponse.json();
     const imageUrl = imageData.data[0].url;
 
+    // Parse the sections based on the interpretation type
+    let sections;
+    if (useIslamicInterpretation) {
+      const parts = analysis.split(/\d\)/).filter(Boolean);
+      sections = {
+        interpretation: parts[0]?.trim() || '',
+        symbolism: parts[3]?.trim() || '', // Islamic symbolism section
+        emotional_analysis: parts[2]?.trim() || '', // Hadith analysis
+        detailed_interpretation: `${parts[1]?.trim() || ''}\n\n${parts[4]?.trim() || ''}` // Combining Quranic references and spiritual guidance
+      };
+    } else {
+      const parts = analysis.split(/\d\)/).filter(Boolean);
+      sections = {
+        interpretation: parts[0]?.trim() || '',
+        symbolism: parts[1]?.trim() || '',
+        emotional_analysis: parts[2]?.trim() || '',
+        detailed_interpretation: parts[3]?.trim() || ''
+      };
+    }
+
     return new Response(
       JSON.stringify({
         title,
-        interpretation,
-        symbolism,
-        emotional_analysis: emotional,
-        detailed_interpretation: detailed,
+        ...sections,
         image_url: imageUrl
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
