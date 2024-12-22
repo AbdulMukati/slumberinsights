@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import SignUpWall from "@/components/SignUpWall";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import AuthButton from "@/components/AuthButton";
 
 interface DreamEntry {
   id: string;
@@ -153,16 +152,10 @@ const Index = () => {
       >
         <div className="text-center mb-12">
           <img
-            src="/lovable-uploads/7cd8c0a1-292b-4b49-a5bd-9a6478c5d82e.png"
+            src="/lovable-uploads/82a43a54-df6e-4d0d-a305-70c2c6f894e9.png"
             alt="Dream Baba"
-            className="w-32 h-32 mx-auto mb-8"
+            className="w-48 h-48 mx-auto mb-8"
           />
-          <h1 className="text-4xl md:text-5xl font-bold text-purple-900 dark:text-purple-100">
-            Dream Interpreter
-          </h1>
-          <p className="text-center mt-4 text-gray-600 dark:text-gray-300">
-            Share your dream and receive a deep, meaningful interpretation
-          </p>
         </div>
         
         <div className="transition-all duration-300">

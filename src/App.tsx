@@ -51,7 +51,7 @@ function App() {
                       Dream Baba
                     </h1>
                   </Link>
-                  <div className="flex items-center gap-2">
+                  <div className="hidden md:flex items-center gap-2">
                     <Button variant="ghost" asChild>
                       <Link to="/journal">Dream Journal</Link>
                     </Button>
@@ -65,6 +65,9 @@ function App() {
                       <Link to="/admin">Admin</Link>
                     </Button>
                     <ThemeToggle />
+                    <AuthButton />
+                  </div>
+                  <div className="md:hidden">
                     <AuthButton />
                   </div>
                 </div>
