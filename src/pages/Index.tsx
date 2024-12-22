@@ -4,7 +4,17 @@ import DreamForm from "@/components/DreamForm";
 import DreamInterpretation from "@/components/DreamInterpretation";
 import LoadingDream from "@/components/LoadingDream";
 import DreamHistory from "@/components/DreamHistory";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DreamEntry {
   dream: string;
@@ -16,15 +26,23 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentDream, setCurrentDream] = useState<DreamEntry | null>(null);
   const [history, setHistory] = useState<DreamEntry[]>([]);
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(!localStorage.getItem('PERPLEXITY_API_KEY'));
   const { toast } = useToast();
 
   const analyzeDream = async (dreamText: string) => {
+    const apiKey = localStorage.getItem('PERPLEXITY_API_KEY');
+    
+    if (!apiKey) {
+      setShowApiKeyDialog(true);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('PERPLEXITY_API_KEY')}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -59,11 +77,26 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to analyze your dream. Please try again.",
+        description: "Failed to analyze your dream. Please check your API key and try again.",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleApiKeySubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const apiKey = formData.get('apiKey') as string;
+    
+    if (apiKey) {
+      localStorage.setItem('PERPLEXITY_API_KEY', apiKey);
+      setShowApiKeyDialog(false);
+      toast({
+        title: "Success",
+        description: "API key has been saved successfully.",
+      });
     }
   };
 
@@ -92,6 +125,33 @@ const Index = () => {
         {history.length > 0 && !isLoading && (
           <DreamHistory dreams={history} />
         )}
+
+        <AlertDialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+          <AlertDialogContent>
+            <form onSubmit={handleApiKeySubmit}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Enter Perplexity API Key</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Please enter your Perplexity API key to use the dream interpretation feature.
+                  You can get your API key from the Perplexity website.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="my-4">
+                <input
+                  type="password"
+                  name="apiKey"
+                  placeholder="Enter your API key"
+                  className="w-full px-4 py-2 border rounded-md"
+                  required
+                />
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction type="submit">Save API Key</AlertDialogAction>
+              </AlertDialogFooter>
+            </form>
+          </AlertDialogContent>
+        </AlertDialog>
       </motion.div>
     </div>
   );
