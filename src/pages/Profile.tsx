@@ -15,70 +15,93 @@ const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Redirect if not logged in
   useEffect(() => {
     if (!user) {
       navigate("/");
-      return;
     }
+  }, [user, navigate]);
 
-    const fetchProfile = async () => {
+  // Fetch profile data
+  useEffect(() => {
+    const getProfile = async () => {
+      if (!user?.id) return;
+
       try {
+        console.log("Fetching profile for user:", user.id);
         const { data, error } = await supabase
           .from("profiles")
           .select("full_name")
           .eq("id", user.id)
-          .maybeSingle();
+          .limit(1)
+          .single();
 
         if (error) {
-          console.error("Error fetching profile:", error);
-          toast({
-            title: "Error",
-            description: "Failed to fetch profile. Please try again.",
-            variant: "destructive",
-          });
+          console.error("Profile fetch error:", error);
+          // If profile doesn't exist, create it
+          if (error.code === 'PGRST116') {
+            const { error: insertError } = await supabase
+              .from("profiles")
+              .insert({ id: user.id, full_name: user.email?.split('@')[0] || 'User' });
+            
+            if (insertError) {
+              console.error("Profile creation error:", insertError);
+              toast({
+                title: "Error",
+                description: "Could not create profile",
+                variant: "destructive",
+              });
+            } else {
+              setFullName(user.email?.split('@')[0] || 'User');
+            }
+          } else {
+            toast({
+              title: "Error",
+              description: "Could not fetch profile",
+              variant: "destructive",
+            });
+          }
           return;
         }
 
         if (data) {
+          console.log("Profile data received:", data);
           setFullName(data.full_name);
         }
-      } catch (error) {
-        console.error("Error in fetchProfile:", error);
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred. Please try again.",
-          variant: "destructive",
-        });
+      } catch (err) {
+        console.error("Unexpected error in getProfile:", err);
       }
     };
 
-    fetchProfile();
-  }, [user, navigate, toast]);
+    getProfile();
+  }, [user, toast]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user?.id || !fullName.trim()) return;
 
     setIsLoading(true);
+    console.log("Updating profile for user:", user.id);
+
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName })
+        .update({ full_name: fullName.trim() })
         .eq("id", user.id);
 
       if (error) {
+        console.error("Profile update error:", error);
         throw error;
       }
 
       toast({
-        title: "Success",
         description: "Profile updated successfully",
       });
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error in handleUpdateProfile:", error);
       toast({
         title: "Error",
-        description: "Failed to update profile. Please try again.",
+        description: "Failed to update profile",
         variant: "destructive",
       });
     } finally {
@@ -94,16 +117,13 @@ const Profile = () => {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
-        title: "Success",
         description: "Password reset email sent",
       });
     } catch (error) {
-      console.error("Error sending reset password email:", error);
+      console.error("Reset password error:", error);
       toast({
         title: "Error",
         description: "Failed to send reset password email",
@@ -112,9 +132,7 @@ const Profile = () => {
     }
   };
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900 p-4">
