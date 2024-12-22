@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import DreamForm from "@/components/DreamForm";
 import DreamInterpretation from "@/components/DreamInterpretation";
@@ -24,6 +24,37 @@ const Index = () => {
   const [pendingDream, setPendingDream] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      fetchDreamHistory();
+    }
+  }, [user]);
+
+  const fetchDreamHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('dreams')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedDreams = data.map(dream => ({
+        dream: dream.dream,
+        interpretation: dream.interpretation,
+        date: new Date(dream.created_at).toLocaleDateString()
+      }));
+
+      setHistory(formattedDreams);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch dream history",
+        variant: "destructive"
+      });
+    }
+  };
 
   const analyzeDream = async (dreamText: string) => {
     if (!user) {
@@ -58,7 +89,7 @@ const Index = () => {
       if (saveError) throw saveError;
       
       setCurrentDream(newDream);
-      setHistory(prev => [newDream, ...prev].slice(0, 5));
+      await fetchDreamHistory(); // Refresh the history after adding new dream
     } catch (error) {
       toast({
         title: "Error",
@@ -80,7 +111,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
-      <AuthButton />
+      <div className="absolute top-4 right-4">
+        <AuthButton />
+      </div>
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
