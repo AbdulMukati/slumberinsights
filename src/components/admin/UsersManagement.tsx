@@ -14,8 +14,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { RefreshCw, Shield, Key } from "lucide-react";
 
+interface Profile {
+  id: string;
+  full_name: string;
+  is_admin: boolean;
+  email?: string;
+  created_at?: string;
+}
+
 const UsersManagement = () => {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<Profile[]>([]);
   const [newPassword, setNewPassword] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
   const { toast } = useToast();
@@ -40,14 +48,14 @@ const UsersManagement = () => {
 
     const { data: { users: authUsers } } = await supabase.auth.admin.listUsers();
     
-    const enrichedProfiles = profiles.map(profile => {
+    const enrichedProfiles = profiles?.map(profile => {
       const authUser = authUsers?.find(u => u.id === profile.id);
       return {
         ...profile,
         email: authUser?.email,
         created_at: authUser?.created_at
       };
-    });
+    }) || [];
 
     setUsers(enrichedProfiles);
   };
@@ -117,7 +125,7 @@ const UsersManagement = () => {
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.is_admin ? "Yes" : "No"}</TableCell>
               <TableCell>
-                {new Date(user.created_at).toLocaleDateString()}
+                {user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
