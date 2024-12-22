@@ -43,7 +43,7 @@ function App() {
                 <div className="flex items-center justify-between h-16">
                   <Link to="/" className="flex items-center gap-4">
                     <img
-                      src="/lovable-uploads/7cd8c0a1-292b-4b49-a5bd-9a6478c5d82e.png"
+                      src="/lovable-uploads/82a43a54-df6e-4d0d-a305-70c2c6f894e9.png"
                       alt="Dream Baba"
                       className="w-12 h-12"
                     />
@@ -51,19 +51,19 @@ function App() {
                       Dream Baba
                     </h1>
                   </Link>
-                  <div className="flex items-center gap-4">
-                    <Link to="/journal">
-                      <Button variant="ghost">Dream Journal</Button>
-                    </Link>
-                    <Link to="/reports">
-                      <Button variant="ghost">Reports</Button>
-                    </Link>
-                    <Link to="/profile">
-                      <Button variant="ghost">Profile</Button>
-                    </Link>
-                    <Link to="/admin">
-                      <Button variant="ghost">Admin</Button>
-                    </Link>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" asChild>
+                      <Link to="/journal">Dream Journal</Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
+                      <Link to="/reports">Reports</Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
+                      <Link to="/profile">Profile</Link>
+                    </Button>
+                    <Button variant="ghost" asChild>
+                      <Link to="/admin">Admin</Link>
+                    </Button>
                     <ThemeToggle />
                     <AuthButton />
                   </div>
