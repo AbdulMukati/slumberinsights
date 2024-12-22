@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   BarChart,
   Bar,
@@ -15,7 +18,9 @@ import { EMOTIONS } from "@/components/dream/EmotionSelector";
 
 const Reports = () => {
   const { user } = useAuth();
-  const [emotionStats, setEmotionStats] = useState<any[]>([]);
+  const navigate = useNavigate();
+  const [beforeEmotions, setBeforeEmotions] = useState<any[]>([]);
+  const [afterEmotions, setAfterEmotions] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDreams = async () => {
@@ -31,29 +36,33 @@ const Reports = () => {
         return;
       }
 
-      // Calculate percentages for before and after emotions
+      // Calculate percentages for before emotions
       const totalDreams = dreams.length;
-      const emotionCounts = EMOTIONS.map((emotion) => {
-        const beforeCount = dreams.filter(
+      const beforeCounts = EMOTIONS.map((emotion) => {
+        const count = dreams.filter(
           (d) => d.emotion_before === emotion.value
         ).length;
-        const afterCount = dreams.filter(
-          (d) => d.emotion_after === emotion.value
-        ).length;
-
         return {
           emotion: emotion.value,
           label: emotion.label,
-          beforePercentage: totalDreams
-            ? Math.round((beforeCount / totalDreams) * 100)
-            : 0,
-          afterPercentage: totalDreams
-            ? Math.round((afterCount / totalDreams) * 100)
-            : 0,
+          percentage: totalDreams ? Math.round((count / totalDreams) * 100) : 0,
         };
       });
 
-      setEmotionStats(emotionCounts);
+      // Calculate percentages for after emotions
+      const afterCounts = EMOTIONS.map((emotion) => {
+        const count = dreams.filter(
+          (d) => d.emotion_after === emotion.value
+        ).length;
+        return {
+          emotion: emotion.value,
+          label: emotion.label,
+          percentage: totalDreams ? Math.round((count / totalDreams) * 100) : 0,
+        };
+      });
+
+      setBeforeEmotions(beforeCounts);
+      setAfterEmotions(afterCounts);
     };
 
     fetchDreams();
@@ -61,65 +70,100 @@ const Reports = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-5xl">
-      <h1 className="text-3xl font-bold mb-6 text-purple-900 dark:text-purple-100">
-        Emotional Journey Report
-      </h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Emotional States Before vs After Interpretation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[400px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={emotionStats} layout="vertical">
-                <XAxis type="number" unit="%" domain={[0, 100]} />
-                <YAxis
-                  dataKey="emotion"
-                  type="category"
-                  tickFormatter={(value) => `${value}`}
-                />
-                <Tooltip
-                  formatter={(value: number, name: string) => [
-                    `${value}%`,
-                    name === "beforePercentage"
-                      ? "Before Interpretation"
-                      : "After Interpretation",
-                  ]}
-                  labelFormatter={(label) =>
-                    emotionStats.find((e) => e.emotion === label)?.label
-                  }
-                />
-                <Legend />
-                <Bar
-                  dataKey="beforePercentage"
-                  name="Before Interpretation"
-                  fill="#9333ea"
-                  radius={[0, 4, 4, 0]}
-                />
-                <Bar
-                  dataKey="afterPercentage"
-                  name="After Interpretation"
-                  fill="#22c55e"
-                  radius={[0, 4, 4, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-6 grid grid-cols-5 gap-4">
-            {EMOTIONS.map((emotion) => (
-              <div
-                key={emotion.value}
-                className="flex flex-col items-center text-center"
-              >
-                <span className="text-2xl">{emotion.value}</span>
-                <span className="text-sm text-muted-foreground">
-                  {emotion.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/")}
+          className="rounded-full"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </Button>
+        <h1 className="text-3xl font-bold text-purple-900 dark:text-purple-100">
+          Emotional Journey Report
+        </h1>
+      </div>
+
+      <div className="grid gap-8">
+        {/* Before Interpretation */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Emotional States Before Dream Interpretation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={beforeEmotions} layout="vertical">
+                  <XAxis type="number" unit="%" domain={[0, 100]} />
+                  <YAxis
+                    dataKey="emotion"
+                    type="category"
+                    tickFormatter={(value) => `${value}`}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [`${value}%`, "Frequency"]}
+                    labelFormatter={(label) =>
+                      beforeEmotions.find((e) => e.emotion === label)?.label
+                    }
+                  />
+                  <Bar
+                    dataKey="percentage"
+                    fill="#9333ea"
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* After Interpretation */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Emotional States After Dream Interpretation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={afterEmotions} layout="vertical">
+                  <XAxis type="number" unit="%" domain={[0, 100]} />
+                  <YAxis
+                    dataKey="emotion"
+                    type="category"
+                    tickFormatter={(value) => `${value}`}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [`${value}%`, "Frequency"]}
+                    labelFormatter={(label) =>
+                      afterEmotions.find((e) => e.emotion === label)?.label
+                    }
+                  />
+                  <Bar
+                    dataKey="percentage"
+                    fill="#22c55e"
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Emoji Legend */}
+        <div className="mt-6 grid grid-cols-5 gap-4">
+          {EMOTIONS.map((emotion) => (
+            <div
+              key={emotion.value}
+              className="flex flex-col items-center text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
+            >
+              <span className="text-2xl">{emotion.value}</span>
+              <span className="text-sm text-muted-foreground mt-2">
+                {emotion.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
