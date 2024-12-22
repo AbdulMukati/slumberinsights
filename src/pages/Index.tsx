@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import DreamForm from "@/components/DreamForm";
 import DreamInterpretation from "@/components/DreamInterpretation";
 import LoadingDream from "@/components/LoadingDream";
-import DreamHistory from "@/components/DreamHistory";
 import { useToast } from "@/hooks/use-toast";
 import SignUpWall from "@/components/SignUpWall";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import AuthButton from "@/components/AuthButton";
+import { Button } from "@/components/ui/button";
+import { CalendarDays } from "lucide-react";
 
 interface DreamEntry {
   dream: string;
@@ -19,42 +21,11 @@ interface DreamEntry {
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentDream, setCurrentDream] = useState<DreamEntry | null>(null);
-  const [history, setHistory] = useState<DreamEntry[]>([]);
   const [showSignUpWall, setShowSignUpWall] = useState(false);
   const [pendingDream, setPendingDream] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      fetchDreamHistory();
-    }
-  }, [user]);
-
-  const fetchDreamHistory = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('dreams')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedDreams = data.map(dream => ({
-        dream: dream.dream,
-        interpretation: dream.interpretation,
-        date: new Date(dream.created_at).toLocaleDateString()
-      }));
-
-      setHistory(formattedDreams);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch dream history",
-        variant: "destructive"
-      });
-    }
-  };
+  const navigate = useNavigate();
 
   const analyzeDream = async (dreamText: string) => {
     if (!user) {
@@ -74,7 +45,7 @@ const Index = () => {
       const newDream: DreamEntry = {
         dream: dreamText,
         interpretation: data.interpretation,
-        date: new Date().toLocaleDateString()
+        date: new Date().toISOString()
       };
       
       const { error: saveError } = await supabase
@@ -89,7 +60,6 @@ const Index = () => {
       if (saveError) throw saveError;
       
       setCurrentDream(newDream);
-      await fetchDreamHistory(); // Refresh the history after adding new dream
     } catch (error) {
       toast({
         title: "Error",
@@ -111,7 +81,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center gap-4">
+        {user && (
+          <Button
+            onClick={() => navigate("/journal")}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <CalendarDays className="w-4 h-4" />
+            Dream Journal
+          </Button>
+        )}
         <AuthButton />
       </div>
       <motion.div 
@@ -134,10 +114,6 @@ const Index = () => {
           <DreamInterpretation dream={currentDream} />
         )}
         
-        {history.length > 0 && !isLoading && (
-          <DreamHistory dreams={history} />
-        )}
-
         {showSignUpWall && (
           <SignUpWall onComplete={handleSignUpComplete} />
         )}
