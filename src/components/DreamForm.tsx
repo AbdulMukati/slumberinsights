@@ -78,13 +78,13 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
       
       <div className="space-y-4">
         <Label htmlFor="dream" className="text-lg">
-          {userName ? `${userName}, describe your dream` : "Describe your dream"}
+          {userName ? "Tell me about your dream" : "Describe your dream"}
         </Label>
         <Textarea
           id="dream"
           value={dream}
           onChange={(e) => setDream(e.target.value)}
-          placeholder={userName ? `${userName}, share the details of your dream...` : "Share the details of your dream..."}
+          placeholder="Share the details of your dream..."
           className="min-h-[200px] mb-4 p-4 text-lg"
           disabled={isLoading}
         />
@@ -92,7 +92,7 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
 
       <div className="space-y-4">
         <Label className="text-lg">
-          {userName ? `${userName}, how do you feel about this dream?` : "How do you feel about this dream?"}
+          How are you feeling about this dream?
         </Label>
         <RadioGroup
           value={emotionBefore}
@@ -119,7 +119,7 @@ const DreamForm = ({ onSubmit, isLoading }: DreamFormProps) => {
         {isLoading ? 
           "Interpreting..." : 
           userName ? 
-            `Interpret ${userName}'s Dream` : 
+            `Let me interpret your dream, ${userName}` : 
             "Interpret Dream"
         }
       </Button>
