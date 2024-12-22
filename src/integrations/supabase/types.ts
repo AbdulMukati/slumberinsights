@@ -96,48 +96,18 @@ export type Database = {
           full_name: string
           id: string
           is_admin: boolean | null
-          subscribed: boolean | null
-          subscription_plan: string | null
         }
         Insert: {
           created_at?: string
           full_name: string
           id: string
           is_admin?: boolean | null
-          subscribed?: boolean | null
-          subscription_plan?: string | null
         }
         Update: {
           created_at?: string
           full_name?: string
           id?: string
           is_admin?: boolean | null
-          subscribed?: boolean | null
-          subscription_plan?: string | null
-        }
-        Relationships: []
-      }
-      user_usage: {
-        Row: {
-          date: string | null
-          dream_interpretations_count: number | null
-          id: string
-          image_generations_count: number | null
-          user_id: string
-        }
-        Insert: {
-          date?: string | null
-          dream_interpretations_count?: number | null
-          id?: string
-          image_generations_count?: number | null
-          user_id: string
-        }
-        Update: {
-          date?: string | null
-          dream_interpretations_count?: number | null
-          id?: string
-          image_generations_count?: number | null
-          user_id?: string
         }
         Relationships: []
       }
@@ -146,14 +116,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      increment_usage: {
-        Args: {
-          p_user_id: string
-          p_dream_interpretations_increment?: number
-          p_image_generations_increment?: number
-        }
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
