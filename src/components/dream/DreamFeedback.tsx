@@ -24,8 +24,15 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const handleSaveNotes = async () => {
-    if (!notes.trim() || !emotionAfter) return;
+  const handleSave = async () => {
+    if (!emotionAfter) {
+      toast({
+        title: "Required Field",
+        description: "Please select how you feel after the interpretation.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -33,7 +40,7 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
       const { error } = await supabase
         .from("dreams")
         .update({
-          notes,
+          notes: notes.trim() || null,
           emotion_after: emotionAfter,
           emotion_after_value: emotion?.score
         })
@@ -43,12 +50,12 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
 
       toast({
         title: "Success",
-        description: "Your notes and feelings have been saved.",
+        description: "Your feedback has been saved.",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save your notes. Please try again.",
+        description: "Failed to save your feedback. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -57,9 +64,9 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
   };
 
   return (
-    <div className="space-y-4 border-t pt-6">
+    <div className="space-y-6 border-t pt-6">
       <div>
-        <Label>How do you feel after reading the interpretation?</Label>
+        <Label className="text-lg mb-4 block">How do you feel after reading the interpretation?</Label>
         <RadioGroup
           value={emotionAfter}
           onValueChange={setEmotionAfter}
@@ -81,7 +88,7 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
       </div>
 
       <div>
-        <Label htmlFor="notes">Your Notes</Label>
+        <Label htmlFor="notes" className="text-lg mb-4 block">Your Notes (Optional)</Label>
         <Textarea
           id="notes"
           value={notes}
@@ -92,11 +99,11 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
       </div>
 
       <Button
-        onClick={handleSaveNotes}
-        disabled={isSaving || !notes.trim() || !emotionAfter}
+        onClick={handleSave}
+        disabled={isSaving || !emotionAfter}
         className="w-full"
       >
-        {isSaving ? "Saving..." : "Save Notes & Feelings"}
+        {isSaving ? "Saving..." : "Save Feedback"}
       </Button>
     </div>
   );

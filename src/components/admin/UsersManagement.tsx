@@ -9,11 +9,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Shield } from "lucide-react";
+import { RefreshCw, Shield, Key } from "lucide-react";
 
 const UsersManagement = () => {
   const [users, setUsers] = useState<any[]>([]);
+  const [newPassword, setNewPassword] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -21,7 +25,6 @@ const UsersManagement = () => {
   }, []);
 
   const fetchUsers = async () => {
-    // First get all profiles
     const { data: profiles, error } = await supabase
       .from("profiles")
       .select("*");
@@ -35,12 +38,10 @@ const UsersManagement = () => {
       return;
     }
 
-    // Then get auth users data
-    const { data: authUsers } = await supabase.auth.admin.listUsers();
+    const { data: { users: authUsers } } = await supabase.auth.admin.listUsers();
     
-    // Combine the data
     const enrichedProfiles = profiles.map(profile => {
-      const authUser = authUsers?.users.find(u => u.id === profile.id);
+      const authUser = authUsers?.find(u => u.id === profile.id);
       return {
         ...profile,
         email: authUser?.email,
@@ -51,24 +52,28 @@ const UsersManagement = () => {
     setUsers(enrichedProfiles);
   };
 
-  const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+  const setPassword = async (userId: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.admin.updateUserById(
+        userId,
+        { password: password }
+      );
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+      });
+      setNewPassword("");
+      setSelectedUserId("");
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to send reset password email",
+        description: "Failed to update password",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Success",
-      description: "Password reset email sent",
-    });
   };
 
   const toggleAdmin = async (userId: string, currentStatus: boolean) => {
@@ -116,14 +121,37 @@ const UsersManagement = () => {
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => resetPassword(user.email)}
-                    title="Reset Password"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setSelectedUserId(user.id)}
+                        title="Set Password"
+                      >
+                        <Key className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Set New Password</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <Input
+                          type="password"
+                          placeholder="New password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <Button 
+                          onClick={() => setPassword(selectedUserId, newPassword)}
+                          disabled={!newPassword}
+                        >
+                          Set Password
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   <Button
                     variant="outline"
                     size="icon"
