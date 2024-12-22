@@ -14,6 +14,17 @@ const DreamContent = ({
   image_url, 
   emotion_before,
 }: DreamContentProps) => {
+  // Function to format text with bold sections
+  const formatText = (text: string) => {
+    return text.split('**').map((part, index) => {
+      return index % 2 === 0 ? (
+        <span key={index}>{part}</span>
+      ) : (
+        <strong key={index} className="font-bold">{part}</strong>
+      );
+    });
+  };
+
   return (
     <CardContent className="space-y-8">
       <div className="prose dark:prose-invert max-w-none">
@@ -44,7 +55,7 @@ const DreamContent = ({
             Interpretation
           </h3>
           <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-            {interpretation}
+            {formatText(interpretation)}
           </div>
         </div>
       </div>

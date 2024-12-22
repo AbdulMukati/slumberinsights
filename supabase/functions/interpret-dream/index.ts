@@ -15,7 +15,8 @@ serve(async (req) => {
 
   try {
     const { dream, userName } = await req.json();
-    console.log('Received dream from:', userName);
+    const firstName = userName?.split('@')[0]?.split('.')[0] || 'friend';
+    console.log('Received dream from:', firstName);
 
     // Generate title
     const titleResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -38,7 +39,6 @@ serve(async (req) => {
 
     const titleData = await titleResponse.json();
     const title = titleData.choices[0].message.content.replace(/"/g, '');
-    console.log('Generated title:', title);
 
     // Generate dream interpretation
     const interpretationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -52,30 +52,31 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a warm, empathetic dream interpreter with a gentle, friendly tone. Address the dreamer by name and speak as if you're having a heart-to-heart conversation. Your interpretations should feel like wisdom from a trusted friend or mentor, combining psychological insight with a touch of mystical understanding.
+            content: `You are Dream Baba, a warm and insightful dream interpreter with a gentle, friendly tone. Address the dreamer by their first name and speak as if you're having an intimate conversation. Your interpretations should feel like wisdom from a trusted friend and spiritual guide.
+
+            Use their first name frequently throughout the response to make it personal. Emphasize important concepts by wrapping them in ** asterisks **.
 
             Structure your response in these sections, maintaining a conversational, personal tone throughout:
-            1) Brief Interpretation: A warm, personal 2-3 sentence overview that speaks directly to them
-            2) Symbolic Analysis: A friendly exploration of the symbols in their dream, relating them to universal human experiences
-            3) Emotional Analysis: A compassionate look at the emotional landscape of their dream, showing understanding and empathy
-            4) Detailed Personal Interpretation: A heartfelt, detailed exploration of how this dream might relate to their life journey
+            1) A warm, personal 2-3 sentence overview that speaks directly to them, using their name
+            2) A friendly exploration of the **key symbols** in their dream, relating them to their personal journey
+            3) A compassionate look at the emotional landscape of their dream, showing deep understanding
+            4) A heartfelt, detailed exploration of how this dream might relate to their life journey, with actionable insights
             
-            Use phrases like "I sense that...", "You might be feeling...", "This reminds me of...", and always maintain a supportive, encouraging tone.`
+            Use phrases like "I sense that...", "Dear [name]...", "You might be feeling...", and always maintain a supportive, encouraging tone. Offer hope and guidance while acknowledging the complexity of their dream experience.`
           },
-          { role: 'user', content: `Dreamer's name: ${userName}\nDream: ${dream}` }
+          { role: 'user', content: `Dreamer's name: ${firstName}\nDream: ${dream}` }
         ],
       }),
     });
 
     const interpretationData = await interpretationResponse.json();
     const analysis = interpretationData.choices[0].message.content;
-    console.log('Generated interpretation:', analysis);
 
     // Parse the sections
     const sections = analysis.split(/\d\)/).filter(Boolean);
     const [interpretation, symbolism, emotional, detailed] = sections.map(s => s.trim());
 
-    // Generate image without text
+    // Generate image
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -93,7 +94,6 @@ serve(async (req) => {
 
     const imageData = await imageResponse.json();
     const imageUrl = imageData.data[0].url;
-    console.log('Generated image URL:', imageUrl);
 
     return new Response(
       JSON.stringify({
