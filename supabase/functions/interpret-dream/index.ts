@@ -16,6 +16,8 @@ serve(async (req) => {
   try {
     const { dream, emotionBefore, userId, useIslamicInterpretation } = await req.json();
     
+    console.log('Processing dream interpretation request:', { useIslamicInterpretation });
+
     // Generate title first
     console.log('Generating title...');
     const titleResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -39,7 +41,7 @@ serve(async (req) => {
     });
 
     const titleData = await titleResponse.json();
-    if (!titleData.choices || !titleData.choices[0]) {
+    if (!titleData.choices?.[0]?.message?.content) {
       console.error('Invalid title response:', titleData);
       throw new Error('Failed to generate title');
     }
@@ -68,7 +70,9 @@ serve(async (req) => {
       
       Emphasize important concepts by wrapping them in ** asterisks **. Keep the tone warm and personal while maintaining Islamic authenticity.
       
-      VERY IMPORTANT: Make sure to provide a complete, unabbreviated interpretation that covers all aspects thoroughly. Do not cut off any section. The total interpretation MUST be at least 300 words.`
+      VERY IMPORTANT: Make sure to provide a complete, unabbreviated interpretation that covers all aspects thoroughly. Do not cut off any section. The total interpretation MUST be at least 300 words.
+
+      Here is the dream: "${dream}"`
       : `You are Dream Baba, a warm and insightful dream interpreter with a gentle, friendly tone. Address the dreamer by their first name and speak as if you're having an intimate conversation. Your interpretations should feel like wisdom from a trusted friend and spiritual guide.
 
       Use their first name frequently throughout the response to make it personal. Emphasize important concepts by wrapping them in ** asterisks **.
@@ -79,7 +83,9 @@ serve(async (req) => {
       3) A compassionate look at the emotional landscape of their dream, showing deep understanding
       4) A heartfelt, detailed exploration of how this dream might relate to their life journey, with actionable insights
       
-      Use phrases like "I sense that...", "Dear [name]...", "You might be feeling...", and always maintain a supportive, encouraging tone.`;
+      Use phrases like "I sense that...", "Dear [name]...", "You might be feeling...", and always maintain a supportive, encouraging tone.
+      
+      Here is the dream: "${dream}"`;
 
     const interpretationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -94,7 +100,10 @@ serve(async (req) => {
             role: 'system',
             content: systemPrompt
           },
-          { role: 'user', content: `Dream: ${dream}\nInitial Emotion: ${emotionBefore}` }
+          { 
+            role: 'user', 
+            content: `Please interpret this dream while considering the dreamer's initial emotion: ${emotionBefore}` 
+          }
         ],
         max_tokens: 3000,
         temperature: 0.7
@@ -102,10 +111,13 @@ serve(async (req) => {
     });
 
     const interpretationData = await interpretationResponse.json();
-    if (!interpretationData.choices || !interpretationData.choices[0]) {
+    console.log('Received interpretation response:', interpretationData);
+
+    if (!interpretationData.choices?.[0]?.message?.content) {
       console.error('Invalid interpretation response:', interpretationData);
       throw new Error('Failed to generate interpretation');
     }
+
     const interpretation = interpretationData.choices[0].message.content;
 
     // Generate image
@@ -130,7 +142,7 @@ serve(async (req) => {
     });
 
     const imageData = await imageResponse.json();
-    if (!imageData.data || !imageData.data[0]) {
+    if (!imageData.data?.[0]?.url) {
       console.error('Invalid image response:', imageData);
       throw new Error('Failed to generate image');
     }
@@ -140,15 +152,22 @@ serve(async (req) => {
     console.log('Parsing sections...');
     let sections;
     if (useIslamicInterpretation) {
-      const parts = interpretation.split(/\d\)/).filter(Boolean);
+      // Split by numbered sections and clean up
+      const parts = interpretation.split(/\d\)\s+/).filter(Boolean);
+      
+      // Map the parts to their respective sections
       sections = {
-        interpretation: parts[0]?.trim() || '',
+        interpretation: parts[0]?.trim() || '', // Bismillah and overview
         symbolism: parts[3]?.trim() || '', // Islamic symbolism section
         emotional_analysis: parts[2]?.trim() || '', // Hadith analysis
-        detailed_interpretation: `${parts[1]?.trim() || ''}\n\n${parts[4]?.trim() || ''}\n\n${parts[5]?.trim() || ''}` // Combining Quranic references, spiritual guidance, and contemporary perspective
+        detailed_interpretation: [
+          parts[1]?.trim() || '', // Quranic references
+          parts[4]?.trim() || '', // Spiritual guidance
+          parts[5]?.trim() || ''  // Contemporary perspective
+        ].filter(Boolean).join('\n\n')
       };
     } else {
-      const parts = interpretation.split(/\d\)/).filter(Boolean);
+      const parts = interpretation.split(/\d\)\s+/).filter(Boolean);
       sections = {
         interpretation: parts[0]?.trim() || '',
         symbolism: parts[1]?.trim() || '',
@@ -157,7 +176,7 @@ serve(async (req) => {
       };
     }
 
-    console.log('Sending response...');
+    console.log('Sending response with sections:', sections);
     return new Response(
       JSON.stringify({
         title,
