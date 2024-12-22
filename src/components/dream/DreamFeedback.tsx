@@ -64,15 +64,15 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
   };
 
   return (
-    <div className="space-y-6 border-t pt-6">
-      <div>
+    <div className="space-y-6 border-t pt-6 px-6">
+      <div className="text-center">
         <Label className="text-lg mb-4 block font-semibold">
           How do you feel after reading the interpretation?
         </Label>
         <RadioGroup
           value={emotionAfter}
           onValueChange={setEmotionAfter}
-          className="flex flex-wrap gap-4 mt-2"
+          className="flex flex-wrap justify-center gap-6 mt-4"
         >
           {EMOTIONS.map(({ value, label }) => (
             <div key={value} className="flex items-center space-x-2">
@@ -89,7 +89,7 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
         </RadioGroup>
       </div>
 
-      <div>
+      <div className="px-6">
         <Label htmlFor="notes" className="text-lg mb-4 block font-semibold">
           Your Notes (Optional)
         </Label>
@@ -105,7 +105,7 @@ const DreamFeedback = ({ dreamId }: DreamFeedbackProps) => {
       <Button
         onClick={handleSave}
         disabled={isSaving || !emotionAfter}
-        className="w-full"
+        className="w-full bg-purple-600 hover:bg-purple-700"
       >
         {isSaving ? "Saving..." : "Save Feedback"}
       </Button>

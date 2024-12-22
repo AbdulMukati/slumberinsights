@@ -16,13 +16,13 @@ interface EmotionSelectorProps {
 
 const EmotionSelector = ({ value, onChange }: EmotionSelectorProps) => (
   <div className="space-y-4">
-    <Label className="text-lg">
+    <Label className="text-lg block text-center">
       How are you feeling about this dream?
     </Label>
     <RadioGroup
       value={value}
       onValueChange={onChange}
-      className="flex flex-wrap gap-4"
+      className="flex flex-wrap justify-center gap-6"
     >
       {EMOTIONS.map(({ value: emotionValue, label }) => (
         <div key={emotionValue} className="flex items-center space-x-2">

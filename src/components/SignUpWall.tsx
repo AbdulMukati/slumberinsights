@@ -22,7 +22,6 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
     try {
       if (isSignUp) {
         await signUp(email, password);
-        // Create profile after successful signup
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([{ id: (await supabase.auth.getUser()).data.user?.id, full_name: fullName }]);
@@ -61,8 +60,8 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
         <h2 className="text-2xl font-bold mb-6 text-center">
           {isSignUp ? "Join us to explore your dreams" : "Welcome back"}
         </h2>
@@ -75,6 +74,7 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required={isSignUp}
+                className="w-full"
               />
             </div>
           )}
@@ -85,6 +85,7 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="w-full"
             />
           </div>
           <div>
@@ -94,9 +95,10 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="w-full"
             />
           </div>
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
             {isSignUp ? "Sign Up" : "Sign In"}
           </Button>
         </form>
@@ -104,7 +106,7 @@ const SignUpWall = ({ onComplete }: SignUpWallProps) => {
           {isSignUp ? "Already have an account? " : "Don't have an account? "}
           <button
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-blue-500 hover:underline"
+            className="text-purple-600 hover:underline dark:text-purple-400"
           >
             {isSignUp ? "Sign In" : "Sign Up"}
           </button>
