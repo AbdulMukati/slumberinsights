@@ -13,6 +13,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -21,27 +22,56 @@ const Admin = () => {
         return;
       }
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", user.id)
-        .single();
+      try {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
 
-      if (error || !profile?.is_admin) {
-        toast({
-          title: "Access Denied",
-          description: "You don't have permission to access this page.",
-          variant: "destructive",
-        });
+        if (error) {
+          console.error("Error checking admin status:", error);
+          toast({
+            title: "Error",
+            description: "Failed to verify admin status.",
+            variant: "destructive",
+          });
+          navigate("/");
+          return;
+        }
+
+        if (!profile?.is_admin) {
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to access this page.",
+            variant: "destructive",
+          });
+          navigate("/");
+          return;
+        }
+
+        setIsAdmin(true);
+      } catch (error) {
+        console.error("Error in admin check:", error);
         navigate("/");
-        return;
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsAdmin(true);
     };
 
     checkAdminStatus();
   }, [user, navigate, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="animate-pulse">
+          <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAdmin) return null;
 
